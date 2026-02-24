@@ -180,14 +180,16 @@ void GPIO_DeInit(GPIO_RegDef_t *pGPIOx)
  * @param[in]       - pin number
  * @param[in]       - none
  *
- * @return          - the current value in the pin
+ * @return          - the current value in the pin(0 or 1)
  *
  * @Note            - none
  *
  */
 uint8_t GPIO_ReadFromInputPin(GPIO_RegDef_t *pGPIOx,uint8_t PinNumber)
 {
-
+	uint8_t value;
+	value = (uint8_t)((pGPIOx->IDR >> PinNumber) & 0x00000001);
+	return value;
 }
 /************************************************************************
  * @fn              - GPIO_ReadFromInputPort
@@ -205,7 +207,9 @@ uint8_t GPIO_ReadFromInputPin(GPIO_RegDef_t *pGPIOx,uint8_t PinNumber)
  */
 uint16_t GPIO_ReadFromInputPort(GPIO_RegDef_t *pGPIOx)
 {
-
+    uint16_t value;
+	value = (uint16_t)pGPIOx->IDR ;
+	return value;
 }
 /************************************************************************
  * @fn              - GPIO_WriteToOutputPin
@@ -300,4 +304,5 @@ void GPIO_IRQHandling(uint8_t PinNumber)
 {
 
 }
+
 
