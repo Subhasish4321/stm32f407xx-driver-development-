@@ -227,7 +227,14 @@ uint16_t GPIO_ReadFromInputPort(GPIO_RegDef_t *pGPIOx)
  */
 void GPIO_WriteToOutputPin(GPIO_RegDef_t *pGPIOx,uint8_t PinNumber,uint8_t value)
 {
-
+	if (value == GPIO_PIN_SET)
+	{
+		pGPIOx->ODR |= (1 << PinNumber);
+	}
+	else
+	{
+		pGPIOx->ODR &= ~(1 << PinNumber);
+	}
 }
 /************************************************************************
  * @fn              - GPIO_WriteToOutputPort
@@ -245,7 +252,7 @@ void GPIO_WriteToOutputPin(GPIO_RegDef_t *pGPIOx,uint8_t PinNumber,uint8_t value
  */
 void GPIO_WriteToOutputPort(GPIO_RegDef_t *pGPIOx,uint16_t value)
 {
-
+	pGPIOx->ODR = value;
 }
 /************************************************************************
  * @fn              - GPIO_ToggleOutputPin
@@ -257,13 +264,13 @@ void GPIO_WriteToOutputPort(GPIO_RegDef_t *pGPIOx,uint16_t value)
  * @param[in]       - none
  *
  * @return          - none
- *
- * @Note            - none
+ * 
+ * @Note            - we can use the XOR operation to achieve this. (0^1=1 and 1^1=0)
  *
  */
 void GPIO_ToggleOutputPin(GPIO_RegDef_t *pGPIOx,uint8_t PinNumber)
 {
-
+   pGPIOx->ODR ^= (1 << PinNumber);
 }
 /*
  * IRQ Handling and ISR handling
@@ -304,5 +311,6 @@ void GPIO_IRQHandling(uint8_t PinNumber)
 {
 
 }
+
 
 
