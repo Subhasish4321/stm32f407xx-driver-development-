@@ -9,12 +9,10 @@
 #define HIGH 1
 #define LOW 0
 #define BUTTON_PRESSED LOW
-
 void delay(void)
 {
     for(uint32_t i =0; i< 500000/2 ;i++);
 }
-
 int main(void)
 {
     GPIO_Handle_t GPIOBtn, GPIOLed;
