@@ -105,24 +105,55 @@ void GPIO_PeriClockControl(GPIO_RegDef_t *pGPIOx,uint8_t EnorDi)
  *
  * @param[in]       - base address of the gpio pheripheral
  * @param[in]       - none
- * @param[in]       - none
- *
- * @return          - none
- *
- * @Note            - none
- *
+ * @Understand : Here what we do is we set the value of GPIOHandle like GPIO_PinMode= GPIO_PIN_MODE_OUT
+ * ans then we use a pointer to access that handle and then do << as we want to reach the specific byte
+ * that affects the specific pin number as each register is used for all 16 pin configuration.
+ * pGPIOHandle->GPIO_PinConfig.GPIO_PinMode = GPIO_PIN_MODE_OUT and this line 121 just do this :
+ * temp = 1 << 12 assuming Gpio pin 12 which equals 0x00 00 08 00(08 = 0000 1000) which is then assigned
+ * to the MODER register by using the base address pointed by GPIOx->MODER.
  */
 void GPIO_Init(GPIO_Handle_t *pGPIOHandle)
 {
-   /*Need code modification,change the code assignment to bitwise or operation so that it does not affect other bits*/
-	if(pGPIOHandle->GPIO_PinConfig.GPIO_PinMode == GPIO_MODE_ALTFN)
-	{
+	uint32_t temp = 0;
+	//Configure the mode of GPIO pin
+    if(pGPIOHandle->GPIO_PinConfig.GPIO_PinMode <= GPIO_MODE_ANALOG)
+    {
+    	temp = (pGPIOHandle->GPIO_PinConfig.GPIO_PinMode << (2*pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber));
+    	pGPIOHandle->pGPIOx->MODER &= ~(0x3 << pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber);//clearing
+        pGPIOHandle->pGPIOx->MODER |= temp;//setting
+
+    }else
+    {
+    	//interrupt mode
+    }
+    temp = 0;
+	//COnfigure the speed
+    temp = (pGPIOHandle->GPIO_PinConfig.GPIO_PinSpeed << (2*pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber));
+    pGPIOHandle->pGPIOx->OSPEEDR &= ~(0x3 << pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber);//clearing
+    pGPIOHandle->pGPIOx->OSPEEDR |= temp ;
+
+    temp = 0;
+	//Configure the pupd settings
+    temp = (pGPIOHandle->GPIO_PinConfig.GPIO_PinPuPdControl << (2*pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber));
+    pGPIOHandle->pGPIOx->PUPDR &= ~(0x3 << pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber); //clearing
+    pGPIOHandle->pGPIOx->PUPDR |= temp ;
+
+    temp = 0;
+	//Configure the output type
+    temp = (pGPIOHandle->GPIO_PinConfig.GPIO_PinOPType << (pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber));
+    pGPIOHandle->pGPIOx->OTYPER &= ~(0x1 << pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber);//clearing
+    pGPIOHandle->pGPIOx->OTYPER |= temp ;
+
+    temp = 0;
+	//Configure the alternate functionality
+    if(pGPIOHandle->GPIO_PinConfig.GPIO_PinMode == GPIO_MODE_ALTFN)
+    {
 		uint8_t temp1,temp2;
 		temp1 = pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber / 8;
 		temp2 = pGPIOHandle->GPIO_PinConfig.GPIO_PinNumber % 8;
-		pGPIOHandle->pGPIOx.AFR[temp1] &= ~(0xF <<( 4* temp2)); //Clearing the bits,need to do same for the above regs also
-		pGPIOHandle->pGPIOx.AFR[temp1] |= pGPIOHandle->GPIO_PinConfig.GPIO_PinAltFunMode << (4*temp2);
-	}
+		pGPIOHandle->pGPIOx->AFR[temp1] &= ~(0xF <<( 4* temp2)); //Clearing
+		pGPIOHandle->pGPIOx->AFR[temp1] |= pGPIOHandle->GPIO_PinConfig.GPIO_PinAltFunMode << (4*temp2);
+    }
 }
 /************************************************************************
  * @fn              - GPIO_DeInit
@@ -131,8 +162,8 @@ void GPIO_Init(GPIO_Handle_t *pGPIOHandle)
  *
  * @param[in]       - base address of the gpio pheripheral
  *
- * @Note: In order to reset all the GPIO peripheal registes we need to use the indibidual bus type 
- * peripheral reset register(RCC_AHB1RSTR in this case) and then set the individual peripheral bit to 1 and then 
+ * @Note: In order to reset all the GPIO peripheal registes we need to use the indibidual bus type
+ * peripheral reset register(RCC_AHB1RSTR in this case) and then set the individual peripheral bit to 1 and then
  *in the next step we need to reset the same bit to 0 otherwise the register will be continuoulsy reset unneccessarily.
  *
  */
@@ -166,7 +197,7 @@ void GPIO_DeInit(GPIO_RegDef_t *pGPIOx)
 	else if(pGPIOx == GPIOI)
 	{
 		GPIOI_REG_RESET();
-	} 
+	}
 }
 /*
  * Read and write
@@ -180,7 +211,7 @@ void GPIO_DeInit(GPIO_RegDef_t *pGPIOx)
  * @param[in]       - pin number
  * @param[in]       - none
  *
- * @return          - the current value in the pin(0 or 1)
+ * @return          - the current value in the pin
  *
  * @Note            - none
  *
@@ -264,7 +295,7 @@ void GPIO_WriteToOutputPort(GPIO_RegDef_t *pGPIOx,uint16_t value)
  * @param[in]       - none
  *
  * @return          - none
- * 
+ *
  * @Note            - we can use the XOR operation to achieve this. (0^1=1 and 1^1=0)
  *
  */
@@ -311,6 +342,3 @@ void GPIO_IRQHandling(uint8_t PinNumber)
 {
 
 }
-
-
-
