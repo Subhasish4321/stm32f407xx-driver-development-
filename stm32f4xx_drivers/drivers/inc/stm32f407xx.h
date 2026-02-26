@@ -80,7 +80,9 @@ typedef struct
 	__vo uint32_t LCKR;			/*GPIO port configuration lock register    Address offset : 0x1C */
 	__vo uint32_t AFR[2];		/*AFR[0]:GPIO Alternate function low register  AFR[1]:AF High register Address offset : 0x20 */
 } GPIO_RegDef_t;
-
+/*
+ * Peripheral register definition structure for RCC
+ */
 typedef struct
 {
 	__vo uint32_t CR;
@@ -117,7 +119,18 @@ typedef struct
 	__vo uint32_t DCKCFGR;
 
 }RCC_Reg_Def_t;
-
+/*
+ * Peripheral register definition structure for EXTI
+ */
+typedef struct 
+{
+	__vo uint32_t IMR; /**< Interrupt mask register */
+	__vo uint32_t EMR; /**< Event mask register */
+	__vo uint32_t RTSR; /**< Rising trigger selection register */
+	__vo uint32_t FTSR; /**< Falling trigger selection register */
+	__vo uint32_t SWIER; /**< Software interrupt event register */
+	__vo uint32_t PR; /**< Pending register */
+}EXTI_RegDef_t;
 /*
  * Peripheral definitions (Peripheral base address type casted to xxxRegDef_t)
  */
@@ -131,7 +144,7 @@ typedef struct
 #define GPIOH  ((GPIO_RegDef_t*)GPIOH_BASEADDR)
 #define GPIOI  ((GPIO_RegDef_t*)GPIOI_BASEADDR)  /*type casted peripheral base address for GPIOI */
 #define RCC    ((RCC_Reg_Def_t*)RCC_BASEADDR)    /*type casted peripheral base address for RCC */
-
+#define EXTI   ((EXTI_RegDef_t*)EXTI_BASEADDR)  /*type casted peripheral base address for EXTI */
 /*
  * Clock enable macros for GPIOx peripherals.
  */
@@ -214,6 +227,7 @@ typedef struct
  * Clock disable macros for SYSCFG peripherals.
  */
 #define SYSCFG_CLK_DIS()    (RCC->APB2ENR &= ~(1 << 14))
+  
 /*
  * Macros to reset GPIOx peripherals.
  * Note: we will first set the bit and then do a reset of the same bit for the purpose explained in DeInit() function
