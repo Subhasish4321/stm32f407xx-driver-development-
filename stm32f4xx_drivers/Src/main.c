@@ -17,9 +17,29 @@
  */
 
 #include "stm32f407xx.h"
-
+// Software delay
+void soft_delay()
+{
+	for(uint32_t i = 0;i < 999999;i++);
+}
 int main(void)
 {
-    /* Loop forever */
-	for(;;);
+	GPIO_Handle_t GPIOLed;
+
+	GPIOLed.pGPIOx = GPIOD;
+	GPIOLed.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_OUT;
+	GPIOLed.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_NO_13;
+	GPIOLed.GPIO_PinConfig.GPIO_PinOPType = GPIO_OP_TYPE_OD;
+	GPIOLed.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_MEDIUM;
+	GPIOLed.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PIN_PU;//intensity is very low
+	//we can use external resistors to make the intensity high.
+	GPIO_PeriClockControl(GPIOD, ENABLE); //Enable peripheral clock.
+    GPIO_Init(&GPIOLed);    //Initialize GPIO Pin.
+
+    while(1)
+    {
+    	GPIO_ToggleOutputPin(GPIOD, GPIO_PIN_NO_13);
+    	soft_delay();
+    }
+
 }
