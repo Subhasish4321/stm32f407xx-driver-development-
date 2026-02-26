@@ -1,4 +1,5 @@
 #include "stm32f407xx.h"
+#define HIGH ENABLE
 #define BUTTON_PRESSED HIGH
 // Software delay
 void soft_delay()
