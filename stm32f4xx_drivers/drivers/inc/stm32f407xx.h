@@ -12,6 +12,30 @@
 
 #define __vo  volatile
 /*
+ * ARM Cortex MX Processor NVIC ISERx register Addresses
+ * We can define the ISERs upto 7 but that's not required now hence making upto 3
+ * We are adding 0x4 to addresses as the reg size is 32 bits(4 byte).
+ */
+#define NVIC_ISER0       ((__vo uint32_t*)0xE000E100 )
+#define NVIC_ISER1       ((__vo uint32_t*)0xE000E104 )
+#define NVIC_ISER2       ((__vo uint32_t*)0xE000E108 )
+#define NVIC_ISER3       ((__vo uint32_t*)0xE000E10C )
+/*
+ *  ARM Cortex MX Processor NVIC ICERx register Addresses
+ */
+#define NVIC_ICER0       ((__vo uint32_t*)0XE000E180 )
+#define NVIC_ICER1       ((__vo uint32_t*)0XE000E184 )
+#define NVIC_ICER2       ((__vo uint32_t*)0XE000E188 )
+#define NVIC_ICER3       ((__vo uint32_t*)0XE000E18C )
+/*
+ *  ARM Cortex Mx Processor NVIC Priority register Base Address.
+ */
+#define NVIC_PR_BASEADDR       ((__vo uint32_t*)0xE000E400 )
+/*
+ * The number of bits which is implemented in each section. Different for different Processor.
+ */
+#define NO_OF_PR_BITS_IMPLEMENTED  4
+/*
  * base addresses of flash and SRAM memories
  */
 
@@ -122,7 +146,7 @@ typedef struct
 /*
  * Peripheral register definition structure for EXTI
  */
-typedef struct 
+typedef struct
 {
 	__vo uint32_t IMR; /**< Interrupt mask register */
 	__vo uint32_t EMR; /**< Event mask register */
@@ -131,6 +155,19 @@ typedef struct
 	__vo uint32_t SWIER; /**< Software interrupt event register */
 	__vo uint32_t PR; /**< Pending register */
 }EXTI_RegDef_t;
+/*
+ * Peripheral register definition structure for SYSCFG
+ */
+typedef struct
+{
+	__vo uint32_t MEMRMP;     /*SYSCFG memory remap register*/
+	__vo uint32_t PMC;        /*SYSCFG peripheral mode configuration register*/
+	__vo uint32_t EXTICR[4];  /*SYSCFG external interrupt configuration register 1 to 4 */
+    uint32_t RESERVED1[2];
+	__vo uint32_t CMPCR;      /* Compensation cell control register */
+	uint32_t RESERVED2[2];
+	__vo uint32_t CFGR;
+}SYSCFG_RegDef_t;
 /*
  * Peripheral definitions (Peripheral base address type casted to xxxRegDef_t)
  */
@@ -143,8 +180,12 @@ typedef struct
 #define GPIOG  ((GPIO_RegDef_t*)GPIOG_BASEADDR)
 #define GPIOH  ((GPIO_RegDef_t*)GPIOH_BASEADDR)
 #define GPIOI  ((GPIO_RegDef_t*)GPIOI_BASEADDR)  /*type casted peripheral base address for GPIOI */
+
 #define RCC    ((RCC_Reg_Def_t*)RCC_BASEADDR)    /*type casted peripheral base address for RCC */
+
 #define EXTI   ((EXTI_RegDef_t*)EXTI_BASEADDR)  /*type casted peripheral base address for EXTI */
+
+#define SYSCFG  ((SYSCFG_RegDef_t*)SYSCFG_BASEADDR) /*type casted peripheral base address for SYSCFG */
 /*
  * Clock enable macros for GPIOx peripherals.
  */
@@ -186,7 +227,7 @@ typedef struct
 /*
  * Clock enable macros for SYSCFG peripherals.
  */
-#define SYSCFG_CLK_EN()    (RCC->APB2ENR |= (1 << 14))
+#define SYSCFG_PCLK_EN()    (RCC->APB2ENR |= (1 << 14))
 
 /*
  * Clock disable macros for GPIOx peripherals.
@@ -227,7 +268,7 @@ typedef struct
  * Clock disable macros for SYSCFG peripherals.
  */
 #define SYSCFG_CLK_DIS()    (RCC->APB2ENR &= ~(1 << 14))
-  
+
 /*
  * Macros to reset GPIOx peripherals.
  * Note: we will first set the bit and then do a reset of the same bit for the purpose explained in DeInit() function
@@ -241,6 +282,33 @@ typedef struct
 #define GPIOG_REG_RESET()     do{ (RCC->AHB1RSTR |= (1 << 6)); (RCC->AHB1RSTR &= ~(1 << 6)); } while(0)
 #define GPIOH_REG_RESET()     do{ (RCC->AHB1RSTR |= (1 << 7)); (RCC->AHB1RSTR &= ~(1 << 7)); } while(0)
 #define GPIOI_REG_RESET()     do{ (RCC->AHB1RSTR |= (1 << 8)); (RCC->AHB1RSTR &= ~(1 << 8)); } while(0)
+/*
+ * A simple function like Macro that takes the GPIPx(Base addr) as input and accordingly defines the macro
+ * according to the GPIO Port given as input.
+ * The \ is used in macro to represent continuitiy of the macro in the next line.
+ */
+#define GPIO_BASEADDR_TO_CODE(x)  ((x == GPIOA) ? 0:\
+		                           (x == GPIOB) ? 1:\
+		                           (x == GPIOC) ? 2:\
+								   (x == GPIOD) ? 3:\
+								   (x == GPIOE) ? 4:\
+								   (x == GPIOF) ? 5:\
+								   (x == GPIOG) ? 6:\
+								   (x == GPIOH) ? 7:8)
+/*
+ * IRQ(Interrupt Request) Number of STM32F407x MCU
+ * Note: update these macros with valid values according to the MCU
+ * NVIC : Nested Vector Interrupt Controller. It is a hardware unit in ARM-Cortex-M processors
+ * that manages and prioritizes asynchronous events(Interrupts).
+ */
+#define IRQ_NO_EXTI0       6
+#define IRQ_NO_EXTI1  	   7
+#define IRQ_NO_EXTI2       8
+#define IRQ_NO_EXTI3       9
+#define IRQ_NO_EXTI4   	  10
+#define IRQ_NO_EXTI9_5 	  23
+#define IRQ_NO_EXTI15_10  40
+
 /*
  * Some generic Macros
  */
