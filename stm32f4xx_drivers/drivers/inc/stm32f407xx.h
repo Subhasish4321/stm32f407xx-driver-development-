@@ -168,6 +168,21 @@ typedef struct
 	uint32_t RESERVED2[2];
 	__vo uint32_t CFGR;
 }SYSCFG_RegDef_t;
+/**
+ * SPI Register definition structure for SPIx peripheral
+ */
+typedef struct
+{
+    uint32_t SPI_CR1;
+	uint32_t SPI_CR2;
+	uint32_t SPI_SR;
+	uint32_t SPI_DR;
+	uint32_t SPI_CRCPR;
+	uint32_t SPI_RXCRCR;
+	uint32_t SPI_TXCRCR;
+	uint32_t SPI_I2SCFGR;
+	uint32_t SPI_I2SPR;
+}SPI_RegDef_t;
 /*
  * Peripheral definitions (Peripheral base address type casted to xxxRegDef_t)
  */
@@ -186,6 +201,9 @@ typedef struct
 #define EXTI   ((EXTI_RegDef_t*)EXTI_BASEADDR)  /*type casted peripheral base address for EXTI */
 
 #define SYSCFG  ((SYSCFG_RegDef_t*)SYSCFG_BASEADDR) /*type casted peripheral base address for SYSCFG */
+#define SPI1    ((SPI_RegDef_t*)SPI1_BASEADDR) /*type casted peripheral base address for SPI1 */
+#define SPI2    ((SPI_RegDef_t*)SPI2_BASEADDR) /*type casted peripheral base address for SPI2 */
+#define SPI3    ((SPI_RegDef_t*)SPI3_BASEADDR) /*type casted peripheral base address for SPI3 */
 /*
  * Clock enable macros for GPIOx peripherals.
  */
