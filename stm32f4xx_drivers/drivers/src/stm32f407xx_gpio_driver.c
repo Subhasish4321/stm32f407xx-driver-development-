@@ -410,7 +410,7 @@ void GPIO_IRQ_IT_Config(uint8_t IRQNumber, uint8_t EnorDis)
  *                  - are not implemented. Hence we need to left shift the IRQPriroty by 4 again.
  *                  - NO_OF_PR_BITS_IMPLEMENTED changes according to MCU hecnce the MACRO is defined.
  */
-void GPIO_IRQPriorityConfig(uint8_t IRQNumber,uint8_t IRQPriority)
+void GPIO_IRQPriorityConfig(uint8_t IRQNumber,uint32_t IRQPriority)
 {
 	//1.IPR register
 	uint8_t iprx = IRQNumber/4;
@@ -418,7 +418,7 @@ void GPIO_IRQPriorityConfig(uint8_t IRQNumber,uint8_t IRQPriority)
 	uint8_t iprx_section = IRQNumber % 4;
 	//3.We are Doing iprx_section*8 because Section 1 means we start from 8th bit and not 1st bit.
 	uint8_t shift_amount = (iprx_section*8) + (8 - NO_OF_PR_BITS_IMPLEMENTED);
-	*(NVIC_PR_BASEADDR + (iprx*4)) |= (IRQPriority  << ( shift_amount ) );
+	*(NVIC_PR_BASEADDR + iprx) |= (IRQPriority  << ( shift_amount ) );
 
 }
 /************************************************************************
