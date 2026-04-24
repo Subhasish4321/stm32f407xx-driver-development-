@@ -40,10 +40,9 @@ typedef struct
 /**
  * SPI_Bus configuration macros
  */
-#define SPI_BUS_CONFIG_FD 0
-#define SPI_BUS_CONFIG_HD 1
-#define SPI_BUS_CONFIG_SRX 2
-#define SPI_BUS_CONFIG_STX 3
+#define SPI_BUS_CONFIG_FD 1
+#define SPI_BUS_CONFIG_HD 2
+#define SPI_BUS_CONFIG_SIMPLEX_RX_ONLY 3
 /**
  * SPI Data Frame Format macros
  */
@@ -52,18 +51,18 @@ typedef struct
 /**
  * SPI Clock Phase macros
  */
-#define SPI_CPHA0 0
-#define SPI_CPHA1 1
+#define SPI_CPHA_LOW 0
+#define SPI_CPHA_HIGH 1
 /**
  * SPI Clock Polarity macros
  */
-#define SPI_CPOL0 0
-#define SPI_CPOL1 1
+#define SPI_CPOL_LOW 0
+#define SPI_CPOL_HIGH 1
 /**
  * SPI Software Slave Management macros
  */
-#define SPI_SSM_EN 1
-#define SPI_SSM_DI 0
+#define SPI_SSM_ENABLE 1
+#define SPI_SSM_DISABLE 0
 /** 
  * SPI SCLK Speed macros
  */
@@ -71,6 +70,34 @@ typedef struct
 #define SPI_SCK_SPEED_DIV4 1
 #define SPI_SCK_SPEED_DIV8 2
 #define SPI_SCK_SPEED_DIV16 3
+#define SPI_SCK_SPEED_DIV32 4
+#define SPI_SCK_SPEED_DIV64 5
+#define SPI_SCK_SPEED_DIV128 6
+#define SPI_SCK_SPEED_DIV256 7
 
+/************************************************************************
+ *        APIs supported by this driver
+ * For more information about the APIs check the function definitions
+ ************************************************************************/
+/*
+ * peripheral Clock setup
+ */
+void SPI_PeriClockControl(SPI_RegDef_t *pSPIx,uint8_t EnorDi);
+/*
+ * Init and DeInit
+ */
+void SPI_Init(SPI_Handle_t *pSPIHandle);
+void SPI_DeInit(SPI_RegDef_t *pSPIx);
+/**
+ * Data Send and receive APIs 
+ */
+void SPI_SendData(SPI_RegDef_t *pSPIx,uint8_t *pTxBuffer, uint32_t len);
+void SPI_ReceiveData(SPI_RegDef_t *pSPIx,uint8_t *pRxBuffer,uint32_t len);
+/**
+ * IRQ Configuration and ISR Handling APIs
+ */
+void SPI_IRQ_IT_Config(uint8_t IRQNumber,uint8_t EnorDis);
+void SPI_IRQPriorityConfig(uint8_t IRQNumber,uint32_t IRQPriority);
+void SPI_IRQHandling(SPI_Handle_t *pHandle);
 
 #endif /* SRC_STM32F407XX_SPI_DRIVER_H_ */
