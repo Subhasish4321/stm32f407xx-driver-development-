@@ -46,7 +46,7 @@ typedef struct
 /**
  * SPI Data Frame Format macros
  */
-#define SPI_DFF_8BITS 0
+#define SPI_DFF_8BITS  0
 #define SPI_DFF_16BITS 1
 /**
  * SPI Clock Phase macros
@@ -74,6 +74,12 @@ typedef struct
 #define SPI_SCK_SPEED_DIV64 5
 #define SPI_SCK_SPEED_DIV128 6
 #define SPI_SCK_SPEED_DIV256 7
+/**
+ * Status Register flag Macros for masking.
+ */
+#define SR_TXE_FLAG   (1 << SPI_SR_TXE)
+#define SR_RXNE_FLAG  (1 << SPI_SR_RXNE)
+#define SR_BUSY_FLAG  (1 << SPI_SR_BSY)
 
 /************************************************************************
  *        APIs supported by this driver
