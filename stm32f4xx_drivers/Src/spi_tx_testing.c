@@ -14,7 +14,7 @@ void SPI2_GPIOInit(void)
     GPIO_Handle_t SpiPins;
     SpiPins.pGPIOx = GPIOB;
     SpiPins.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_ALTFN;
-    SpiPins.GPIO_PinConfig.GPIO_PinAltFunMode = GPIO_AF_5;
+    SpiPins.GPIO_PinConfig.GPIO_PinAltFunMode = GPIO_ALT_FUN_5;
     SpiPins.GPIO_PinConfig.GPIO_PinOPType = GPIO_OP_TYPE_PP;//For I2C we are supposed to use OD but SPI we can use PP
     SpiPins.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_NO_PUPD;
     SpiPins.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_FAST;
