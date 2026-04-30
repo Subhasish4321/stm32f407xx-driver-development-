@@ -94,6 +94,8 @@ void SPI_PeriClockControl(SPI_RegDef_t *pSPIx,uint8_t EnorDi);
  */
 void SPI_Init(SPI_Handle_t *pSPIHandle);
 void SPI_DeInit(SPI_RegDef_t *pSPIx);
+void SPI_EnableOrDisable(SPI_RegDef_t *pSPIx, uint8_t EnOrDi);
+void SPI_InternalSlaveSelectConfiguration(SPI_RegDef_t *pSPIx, uint8_t EnOrDi);
 /**
  * Data Send and receive APIs 
  */
