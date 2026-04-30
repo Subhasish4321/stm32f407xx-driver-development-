@@ -86,13 +86,13 @@ typedef struct
  * @GPIO_PIN_ALT_FUN_MODE
  * GPIO pin Alternate functionality modes.
  */
-#define _GPIO_ALT_FUN_MODE_0 0
-#define _GPIO_ALT_FUN_MODE_1 1
-#define _GPIO_ALT_FUN_MODE_2 2
-#define _GPIO_ALT_FUN_MODE_3 3
-#define _GPIO_ALT_FUN_MODE_4 4
-#define _GPIO_ALT_FUN_MODE_5 5
-#define _GPIO_ALT_FUN_MODE_6 6
+#define GPIO_ALT_FUN_MODE_0 0
+#define GPIO_ALT_FUN_MODE_1 1
+#define GPIO_ALT_FUN_MODE_2 2
+#define GPIO_ALT_FUN_MODE_3 3
+#define GPIO_ALT_FUN_MODE_4 4
+#define GPIO_ALT_FUN_MODE_5 5
+#define GPIO_ALT_FUN_MODE_6 6
 /************************************************************************
  *        APIs supported by this driver
  * For more information about the APIs check the function definitions
