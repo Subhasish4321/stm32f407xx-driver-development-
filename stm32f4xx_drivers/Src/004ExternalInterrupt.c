@@ -15,6 +15,7 @@
 */
 #include "stm32f407xx.h"
 #include <string.h>
+#include "stm32f407xx_gpio_driver.h"
 
 // Software delay
 void soft_delay()

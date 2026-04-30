@@ -18,8 +18,8 @@ void SPI2_GPIOInit(void)
     SpiPins.GPIO_PinConfig.GPIO_PinOPType = GPIO_OP_TYPE_PP;//For I2C we are supposed to use OD but SPI we can use PP
     SpiPins.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_NO_PUPD;
     SpiPins.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_FAST;
-    
-    //Enable the peripheral clock  
+
+    //Enable the peripheral clock
 	GPIO_PeriClockControl(GPIOB,ENABLE);
     //MOSI
     SpiPins.GPIO_PinConfig.GPIO_PinNumber = 15;
@@ -50,10 +50,19 @@ void SPI2_Init(void)
     SPI_PeriClockControl(SPI2,ENABLE);
     SPI_Init(&SPIHandle);
 }
-void main()
+int main()
 {
     char data[] = "Hello World";
     SPI2_GPIOInit();
     SPI2_Init();
-    SPI_SendData(SPI2,data,strlen(data));
+    /**
+     * Need to set the bit of SSI as this bit value is set or reset on NSS Pin when SSM bit is enabled.
+     * Which can set the MODF(Mode fault )Bit high since if SSM=1 and SSI=0 then MSTR is set to Slave mode
+     * which does not enable sclk and thus no SPI.
+     */
+    SPI_InternalSlaveSelectConfiguration(SPI2,ENABLE);
+    //Enable SPI using the SPE bit
+    SPI_EnableOrDisable(SPI2,ENABLE);
+    SPI_SendData(SPI2,(uint8_t*)data,strlen(data));
+    return 0;
 }
