@@ -24,15 +24,15 @@ void SPI2_GPIOInit(void)
     //MOSI
     SpiPins.GPIO_PinConfig.GPIO_PinNumber = 15;
     GPIO_Init(&SpiPins);
-    //MISO
-    SpiPins.GPIO_PinConfig.GPIO_PinNumber = 14;
-    GPIO_Init(&SpiPins);
+//    //MISO
+//    SpiPins.GPIO_PinConfig.GPIO_PinNumber = 14;
+//    GPIO_Init(&SpiPins);
     //SCLK
      SpiPins.GPIO_PinConfig.GPIO_PinNumber = 13;
     GPIO_Init(&SpiPins);
-    //NSS
-    SpiPins.GPIO_PinConfig.GPIO_PinNumber = 12;
-    GPIO_Init(&SpiPins);
+//    //NSS
+//    SpiPins.GPIO_PinConfig.GPIO_PinNumber = 12;
+//    GPIO_Init(&SpiPins);
 
 }
 void SPI2_Init(void)
@@ -44,7 +44,7 @@ void SPI2_Init(void)
     SPIHandle.SPI_Config.SPI_CPHA = SPI_CPHA_LOW;
     SPIHandle.SPI_Config.SPI_CPOL = SPI_CPOL_LOW;
     SPIHandle.SPI_Config.SPI_DFF = SPI_DFF_8BITS;
-    SPIHandle.SPI_Config.SPI_SclkSpeed =SPI_SCK_SPEED_DIV2;
+    SPIHandle.SPI_Config.SPI_SclkSpeed =SPI_SCK_SPEED_DIV8;
     SPIHandle.SPI_Config.SPI_SSM = SPI_SSM_ENABLE; //Whenever there is no Slave we don't need to use NSS Pin hence Hardware Slave Management is not required.
     //Enable the peripheral clock,we could do this inside the SPI_Init function in case the user forgets.
     SPI_PeriClockControl(SPI2,ENABLE);
@@ -64,5 +64,10 @@ int main()
     //Enable SPI using the SPE bit
     SPI_EnableOrDisable(SPI2,ENABLE);
     SPI_SendData(SPI2,(uint8_t*)data,strlen(data));
+    /*Before we disable SPI we need to confirm SPI is not busy and we can do that by checking the BSY flag of SR register */
+	while(SPI_GetFlagStatus(SPI2, SR_BUSY_FLAG));//IF BSY bit is 1 SPI is Busy else free and we can Deactivate.
+
+	/*Disable SPI*/
+	SPI_EnableOrDisable(SPI2,DISABLE);
     return 0;
 }
