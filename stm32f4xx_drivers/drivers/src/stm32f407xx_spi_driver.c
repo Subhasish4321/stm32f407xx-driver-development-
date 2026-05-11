@@ -150,6 +150,17 @@ void SPI_InternalSlaveSelectConfiguration(SPI_RegDef_t *pSPIx, uint8_t EnOrDi)
 		}
 
 }
+void SPI_SSOE_Config(SPI_RegDef_t *pSPIx, uint8_t EnOrDi)
+{
+		if(EnOrDi == ENABLE)
+		{
+			pSPIx->SPI_CR2 |= (1 << SPI_CR2_SSOE);
+		}
+		else{
+			pSPIx->SPI_CR2 &= ~(1 << SPI_CR2_SSOE);
+		}
+
+}
 /************************************************************************
  * @fn              - SPI_DeInit()
  *
@@ -168,17 +179,7 @@ void SPI_DeInit(SPI_RegDef_t *pSPIx)
 {
 	pSPIx->SPI_CR1 = 0;
 }
-//void SPI_EnableOrDisable(SPI_RegDef_t *pSPIx, uint8_t EnOrDi)
-//{
-//	if(EnOrDi == ENABLE)
-//	{
-//		pSPIx->SPI_CR1 |= (1 << SPI_CR1_SPE);
-//	}
-//	else
-//	{
-//		pSPIx->SPI_CR1 &= ~(1 << SPI_CR1_SPE);
-//	}
-//}
+
 /**
  * Data Send and receive APIs 
  */
