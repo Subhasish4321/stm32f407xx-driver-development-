@@ -247,7 +247,30 @@ void SPI_SendData(SPI_RegDef_t *pSPIx,uint8_t *pTxBuffer, uint32_t len)
 }
 void SPI_ReceiveData(SPI_RegDef_t *pSPIx,uint8_t *pRxBuffer,uint32_t len)
 {
+	 while(len > 0)
+    {
+    	//Wait until RXNE is set
+    	while(!SPI_GetFlagStatus(pSPIx,SR_RXNE_FLAG)){}
+    	// check for DFF from CR1
+    	if(pSPIx->SPI_CR1 & (1 << SPI_CR1_DFF) )
+    	{
+    		//16 Bits data frame format.
+    		//before dereferencing using *(pointer type)we need to type cast to 16 bit pointer type to get 16 bit data.
+    		*((uint16_t*)pRxBuffer) = pSPIx->SPI_DR;
+    		len --;
+    		len --;
+    		//Increment the buffer address for next data bytes
+    		(uint16_t*)pRxBuffer++;// This simply means pTxBuffer is a pointer to a data which of unsigned int 16 bit data type.
+    	}
+    	else
+    	{
+    		//8 bit Data frame format.
+    		*((uint16_t*)pRxBuffer) = pSPIx->SPI_DR;
+    		len--;
+    		pRxBuffer++;
+    	}
 
+    }
 }
 /**
  * IRQ Configuration and ISR Handling APIs
