@@ -22,6 +22,11 @@ void delay()
 {
 	for(uint32_t i = 0;i < 999999;i++);
 }
+void small_delay()
+{
+	for(uint32_t i = 0;i < 9999;i++);
+}
+
 /**
  * SPI Pins
  * SPI2_MISO PB14 in AF5 mode
@@ -84,15 +89,24 @@ void SPI2_GPIOButtonInit(void)
 
 	GPIO_Init(&GPIOBtn);
 }
-void SPI_VerifyResponse(uint8_t ackbyte)
+uint8_t SPI_VerifyResponse(uint8_t ackbyte)
 {
   if(ackbyte == 0x05)
   {
-    //ack
+    return 1
   }
-  else
-  {
-  }
+  return 0;
+}
+void make_shift_reg_ready_for_read(void)
+{
+	//Do dummy read to clear off the RXNE i,e, we discard the data send by slave shift reg when we send 1 byte data
+	SPI_ReceiveData(SPI2,&dummy_read,1);
+
+	/**Concept: In Spi inorder to fetch the response from slave we need to send some dummy bytes.
+	 * SPI in Slave will not initiate data transfer to move the data from shift register,slave makes ready the response
+	 * and put the response in the Shift registers of SPI but to fetch the ready data we need to send some dummy bytes.
+	 */
+	SPI_SendData(SPI2,&dummy_write,1);
 }
 /**
  * @Note In this case we have a slave so we use SSM = 0. On the slave side the SS pin should be pulled to zero for it
@@ -101,8 +115,10 @@ void SPI_VerifyResponse(uint8_t ackbyte)
  */
 int main()
 {
-    uint8_t dummy_byte = 0xff;// for 1 byte. For 2 bytes 0xffff
+    uint8_t dummy_write = 0xff;// for 1 byte. For 2 bytes 0xffff
+    uint8_t dummy_read;
     uint8_t ackbyte;
+    uint8_t args[2];
     /*Initialize GPIO for SPI Configuration Pins*/
     SPI2_GPIOInit();
 
@@ -124,20 +140,77 @@ int main()
 		/*Enable SPI*/
 		SPI_EnableOrDisable(SPI2,ENABLE);
       
-    //1. CMD_LED_CTRL  <pin no(1)>  <value(1)>
-      uint8_t commandcode = COMMAND_LED_CTRL;
-      SPI_SendData(SPI2, &commandcode, 1);
-      
-		/**Concept: In Spi inorder to fetch the response from slave we need to send some dummy bytes.
-     * SPI in Slave will not initiate data transfer to move the data from shift register,clave makes ready the response
-     * and put the response in the Shift registers of SPI but to fetch the ready data we need to send some dummy bytes.
-     */
-    SPI_SendData(SPI2,dummy_byte,1);
-    //receive the ack from the slave 
-    SPI_ReceiveData(SPI2,&ackbyte,1);
-    //Verify the ackbyte is valid or not
-    SPI_VerifyResponse(uint8_t ackbyte);
-      
+		//1. CMD_LED_CTRL  <pin no(1)>  <value(1)>
+		uint8_t commandcode = COMMAND_LED_CTRL;
+		SPI_SendData(SPI2, &commandcode, 1);
+		// clean the registers for receiving data.
+		make_shift_reg_ready_for_read();
+
+		//receive the ack from the slave
+		SPI_ReceiveData(SPI2,&ackbyte,1);
+
+		//Verify the ackbyte is valid or not
+		if (SPI_VerifyResponse(ackbyte))
+		{
+			args[0] = LED_PIN;
+			args[1] = LED_ON;
+
+			//send arguments
+			SPI_SendData(SPI2,args,2);
+		}
+        /*--------end of COMMAND_LED_CTRL--------------*/
+
+		/*-------2. COMMAND_SENSOR_READ  <analog pin number (1)>----*/
+
+		/*Send Data only after button pressed*/
+		while(!GPIO_ReadFromInputPin(GPIOA, GPIO_PIN_NO_0));
+		/*Delay to avoid debouncing */
+		delay();
+
+		commandcode = COMMAND_SENSOR_READ;
+		//Send command
+		SPI_SendData(SPI2, &commandcode, 1);
+
+		// clean the registers for receiving data.
+		make_shift_reg_ready_for_read();
+
+		//receive the ack from the slave
+		SPI_ReceiveData(SPI2,&ackbyte,1);
+
+		//verify the data
+		if(SPI_VerifyResponse(ackbyte))
+		{
+			args[0] = ANALOG_PIN0;
+			//Send arguments
+			SPI_SendData(SPI2,args,1);
+
+			// We sent the command to read the sensor data from the slave
+			//Next we receive the sensor analog value from slave.
+
+			/** we will introduce some delay for the salve to Do the ADC conversions since it reads the data from the Analog Pin
+			 * And converts it to digital after it receives sensor read command and then only the data gets ready to be sent to shift reg.
+			 * So remember whenever there is any involvement of ADC or DAC we should wait before we fetch the data.
+			 */
+			small_delay();
+			// clean the registers for receiving data.
+			make_shift_reg_ready_for_read();
+			//we receive the analog value in a variable
+			uint8_t analog_value;
+			SPI_ReceiveData(SPI2,&analog_value,1);
+		}
+		/*----------End of reading analog value from Slave----------*/
+        /*----------------------------------------COMMAND_LED_READ----------------------------------------------*/
+
+		/*----------------------------------------End of COMMAND_LED_READ----------------------------------------------*/
+
+		/*----------------------------------------COMMAND_PRINT-------------------------------------------------*/
+
+		/*----------------------------------------End of COMMAND_PRINT-------------------------------------------------*/
+
+		/*----------------------------------------COMMAND_ID_READ-----------------------------------------------*/
+
+		/*----------------------------------------End of COMMAND_ID_READ-----------------------------------------------*/
+		//DISABLE SPI
 		/*Before we disable SPI we need to confirm SPI is not busy and we can do that by checking the BSY flag of SR register */
 		while(SPI_GetFlagStatus(SPI2, SR_BUSY_FLAG));//IF BSY bit is 1 SPI is Busy else free and we can Deactivate.
 
