@@ -200,6 +200,23 @@ int main()
 		}
 		/*----------End of reading analog value from Slave----------*/
         /*----------------------------------------COMMAND_LED_READ----------------------------------------------*/
+		while(!GPIO_ReadFromInputPin(GPIOA, GPIO_PIN_NO_0));
+		delay();
+		commandcode = COMMAND_LED_READ;
+		SPI_SendData(SPI2,&commandcode,1);
+		SPI_ReceiveData(SPI2,&dummy_read,1);
+		SPI_SendData(SPI2,&dummy_write,1);
+		SPI_ReceiveData(SPI2,&ackbyte,1);
+		if(SPI_VerifyResponse(ackbyte))
+		{
+			args[0] = LED_PIN;
+			SPI_SendData(SPI2,args,1);
+			SPI_ReceiveData(SPI2,&dummy_read,1);
+			small_delay();
+			SPI_SendData(SPI2,&dummy_write,1);
+			uint8_t led_status;
+			SPI_ReceiveData(SPI2,&led_status,1);
+		}
 
 		/*----------------------------------------End of COMMAND_LED_READ----------------------------------------------*/
 
