@@ -326,6 +326,12 @@ typedef struct
 #define IRQ_NO_EXTI4   	  10
 #define IRQ_NO_EXTI9_5 	  23
 #define IRQ_NO_EXTI15_10  40
+/**
+ * IRQ Number for SPI
+ */
+ #define IRQ_NO_SPI1  35
+ #define IRQ_NO_SPI2  36
+
 /*
  * IRQ Priority
  */
