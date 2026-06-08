@@ -1,5 +1,7 @@
 #include "stm32f407xx.h"
 #include <string.h>
+
+extern void initialise_monitor_handles();
 //COMMAND CODES
 #define COMMAND_LED_CTRL    0x50
 #define COMMAND_SENSOR_READ  0x51
@@ -119,6 +121,7 @@ int main()
     uint8_t dummy_read;
     uint8_t ackbyte;
     uint8_t args[2];
+    initialise_monitor_handles();
     /*Initialize GPIO for SPI Configuration Pins*/
     SPI2_GPIOInit();
 
@@ -197,6 +200,7 @@ int main()
 			//we receive the analog value in a variable
 			uint8_t analog_value;
 			SPI_ReceiveData(SPI2,&analog_value,1);
+			printf("COMMAND_SENSOR READ : %d \n",analog_read);
 		}
 		/*----------End of reading analog value from Slave----------*/
         /*----------------------------------------COMMAND_LED_READ----------------------------------------------*/
@@ -216,16 +220,101 @@ int main()
 			SPI_SendData(SPI2,&dummy_write,1);
 			uint8_t led_status;
 			SPI_ReceiveData(SPI2,&led_status,1);
+			/*
+			 * Steps for printing
+			 * 1. update linker flags:
+			 * -specs=rdimon.specs -lc -lrdimon
+			 * 2.Go to debug config. select the binary ,go to startup tab and paste the command "monitor arm semihosting enable" in the Run Commands box.
+			 * 3.related to application.c file is already done here.
+			 * 4.Exclude sysmem.c under startup from build.
+			 * */
+			printf("The LED status is %d \n",led_status);
 		}
 
 		/*----------------------------------------End of COMMAND_LED_READ----------------------------------------------*/
 
 		/*----------------------------------------COMMAND_PRINT-------------------------------------------------*/
+		while( ! GPIO_ReadFromInputPin(GPIOA,GPIO_PIN_NO_0) );
+
+		//to avoid button de-bouncing related issues 200ms of delay
+		delay();
+
+		commandcode = COMMAND_PRINT;
+
+		//send command
+		SPI_SendData(SPI2,&commandcode,1);
+
+		//do dummy read to clear off the RXNE
+		SPI_ReceiveData(SPI2,&dummy_read,1);
+
+		//Send some dummy byte to fetch the response from the slave
+		SPI_SendData(SPI2,&dummy_write,1);
+
+		//read the ack byte received
+		SPI_ReceiveData(SPI2,&ackbyte,1);
+
+		uint8_t message[] = "Hello ! How are you ??";
+		if( SPI_VerifyResponse(ackbyte))
+		{
+			args[0] = strlen((char*)message);
+
+			//send arguments
+			SPI_SendData(SPI2,args,1); //sending length
+
+			//do dummy read to clear off the RXNE
+			SPI_ReceiveData(SPI2,&dummy_read,1);
+
+			delay();
+
+			//send message
+			for(int i = 0 ; i < args[0] ; i++){
+				SPI_SendData(SPI2,&message[i],1);
+				SPI_ReceiveData(SPI2,&dummy_read,1);
+			}
+
+			printf("COMMAND_PRINT Executed \n");
+
+		}
 
 		/*----------------------------------------End of COMMAND_PRINT-------------------------------------------------*/
 
 		/*----------------------------------------COMMAND_ID_READ-----------------------------------------------*/
+		while( ! GPIO_ReadFromInputPin(GPIOA,GPIO_PIN_NO_0) );
 
+		//to avoid button de-bouncing related issues 200ms of delay
+		delay();
+
+		commandcode = COMMAND_ID_READ;
+
+		//send command
+		SPI_SendData(SPI2,&commandcode,1);
+
+		//do dummy read to clear off the RXNE
+		SPI_ReceiveData(SPI2,&dummy_read,1);
+
+		//Send some dummy byte to fetch the response from the slave
+		SPI_SendData(SPI2,&dummy_write,1);
+
+		//read the ack byte received
+		SPI_ReceiveData(SPI2,&ackbyte,1);
+
+		uint8_t id[11];
+		uint32_t i=0;
+		if( SPI_VerifyResponse(ackbyte))
+		{
+			//read 10 bytes id from the slave
+			for(  i = 0 ; i < 10 ; i++)
+			{
+				//send dummy byte to fetch data from slave
+				SPI_SendData(SPI2,&dummy_write,1);
+				SPI_ReceiveData(SPI2,&id[i],1);
+			}
+
+			id[10] = '\0';
+
+			printf("COMMAND_ID : %s \n",id);
+
+		}
 		/*----------------------------------------End of COMMAND_ID_READ-----------------------------------------------*/
 		//DISABLE SPI
 		/*Before we disable SPI we need to confirm SPI is not busy and we can do that by checking the BSY flag of SR register */
@@ -233,6 +322,7 @@ int main()
 
 		/*Disable SPI*/
 		SPI_EnableOrDisable(SPI2,DISABLE);
+		printf("SPI comm dfisabled \n");
     }
     return 0;
 }
