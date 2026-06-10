@@ -1,6 +1,6 @@
 #include "stm32f407xx.h"
 #include <string.h>
-
+#include <stdio.h>
 extern void initialise_monitor_handles();
 //COMMAND CODES
 #define COMMAND_LED_CTRL    0x50
@@ -95,12 +95,14 @@ uint8_t SPI_VerifyResponse(uint8_t ackbyte)
 {
   if(ackbyte == 0x05)
   {
-    return 1
+    return 1;
   }
   return 0;
 }
 void make_shift_reg_ready_for_read(void)
 {
+	uint8_t dummy_write = 0xff;// for 1 byte. For 2 bytes 0xffff
+	uint8_t dummy_read;
 	//Do dummy read to clear off the RXNE i,e, we discard the data send by slave shift reg when we send 1 byte data
 	SPI_ReceiveData(SPI2,&dummy_read,1);
 
@@ -117,6 +119,7 @@ void make_shift_reg_ready_for_read(void)
  */
 int main()
 {
+	printf("Hello subha");
     uint8_t dummy_write = 0xff;// for 1 byte. For 2 bytes 0xffff
     uint8_t dummy_read;
     uint8_t ackbyte;
@@ -200,7 +203,7 @@ int main()
 			//we receive the analog value in a variable
 			uint8_t analog_value;
 			SPI_ReceiveData(SPI2,&analog_value,1);
-			printf("COMMAND_SENSOR READ : %d \n",analog_read);
+			printf("COMMAND_SENSOR READ : %d \n",analog_value);
 		}
 		/*----------End of reading analog value from Slave----------*/
         /*----------------------------------------COMMAND_LED_READ----------------------------------------------*/
