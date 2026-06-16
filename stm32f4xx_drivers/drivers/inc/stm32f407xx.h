@@ -12,16 +12,17 @@
 
 #define __vo  volatile
 /*
- * ARM Cortex MX Processor NVIC ISERx register Addresses
+ * ARM Cortex MX Processor NVIC ISERx(Interrupt Set Enable Registers) register Addresses
  * We can define the ISERs upto 7 but that's not required now hence making upto 3
  * We are adding 0x4 to addresses as the reg size is 32 bits(4 byte).
+ * For more info we can refer to Cortex M4 Generic User Guide(DUIO553.pdf).
  */
 #define NVIC_ISER0       ((__vo uint32_t*)0xE000E100 )
 #define NVIC_ISER1       ((__vo uint32_t*)0xE000E104 )
 #define NVIC_ISER2       ((__vo uint32_t*)0xE000E108 )
 #define NVIC_ISER3       ((__vo uint32_t*)0xE000E10C )
 /*
- *  ARM Cortex MX Processor NVIC ICERx register Addresses
+ *  ARM Cortex MX Processor NVIC ICERx(Interrupt Clear Enable Registers) register Addresses
  */
 #define NVIC_ICER0       ((__vo uint32_t*)0XE000E180 )
 #define NVIC_ICER1       ((__vo uint32_t*)0XE000E184 )
