@@ -32,7 +32,6 @@ void delay(void)
  * MOSI  11  // Master Out Slave In.
  * SS    10  // Slave Select . Arduino SPI pins respond only if SS pulled low by the master
  *
-
  */
 
 void SPI2_GPIOInits(void)
@@ -89,21 +88,8 @@ void SPI2_GPIOButtonInit(void)
 	GPIOBtn.GPIO_PinConfig.GPIO_PinOPType = GPIO_OP_TYPE_PP;
 	GPIOBtn.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_FAST;
 	GPIOBtn.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_NO_PUPD;
-
-
-//	GPIO_Handle_t GPIOPin;
-//	GPIOPin.pGPIOx = GPIOA;
-//	GPIOPin.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_OUT;
-//	GPIOPin.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_NO_5;
-//	GPIOPin.GPIO_PinConfig.GPIO_PinOPType = GPIO_OP_TYPE_PP;
-//	GPIOPin.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_FAST;
-//	GPIOPin.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_NO_PUPD;
-
 	GPIO_PeriClockControl(GPIOA, ENABLE); //Enable peripheral clock.
-
 	GPIO_Init(&GPIOBtn);
-//	GPIO_Init(&GPIOPin);
-
 }
 
 
@@ -112,19 +98,10 @@ int main(void)
 	char user_data[] = "hello";
 	initialise_monitor_handles();
 	SPI2_GPIOButtonInit();
-//    printf("Printing is on \n");
 	//this function is used to initialize the GPIO pins to behave as SPI2 pins
 	SPI2_GPIOInits();
-
-//	while(1)
-//	{
-//		uint8_t button_state = GPIO_ReadFromInputPin(GPIOA,GPIO_PIN_NO_0);
-//		delay();
-//		printf("Button state: %d \n",button_state);
-//	}
 	//This function is used to initialize the SPI2 peripheral parameters
 	SPI2_Init();
-
 	/*
 	* making SSOE 1 does NSS output enable.
 	* The NSS pin is automatically managed by the hardware.
@@ -142,20 +119,18 @@ int main(void)
 
 		//enable the SPI2 peripheral
 		SPI_EnableOrDisable(SPI2,ENABLE);
-//		GPIO_WriteToOutputPin(GPIOA, GPIO_PIN_NO_5, 0);//using alternate pin since NSS seems to be not working.
+		
 		delay();
-//		uint8_t Nss_state = GPIO_ReadFromInputPin(GPIOA, GPIO_PIN_NO_5);
-//        printf("The pa5 is %d \n",Nss_state);
+		
 		//first send length information
 		uint8_t dataLen = strlen(user_data);
 		SPI_SendData(SPI2,&dataLen,1);
-//		delay();
+		
 		//to send data
 		SPI_SendData(SPI2,(uint8_t*)user_data,strlen(user_data));
 
 		//lets confirm SPI is not busy
 		while( SPI_GetFlagStatus(SPI2,SR_BUSY_FLAG) );
-//		GPIO_WriteToOutputPin(GPIOA, GPIO_PIN_NO_5, 1);
 		//Disable the SPI2 peripheral
 		SPI_EnableOrDisable(SPI2,DISABLE);;
 	}
