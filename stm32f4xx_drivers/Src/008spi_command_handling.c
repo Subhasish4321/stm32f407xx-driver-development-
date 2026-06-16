@@ -49,7 +49,7 @@ void SPI2_GPIOInit(void)
     SpiPins.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_FAST;
 
     //Enable the peripheral clock
-	  GPIO_PeriClockControl(GPIOB,ENABLE);
+	GPIO_PeriClockControl(GPIOB,ENABLE);
     //MOSI
     SpiPins.GPIO_PinConfig.GPIO_PinNumber = 15;
     GPIO_Init(&SpiPins);
@@ -145,7 +145,7 @@ int main()
 
 		/*Enable SPI*/
 		SPI_EnableOrDisable(SPI2,ENABLE);
-      
+        delay();
 		//1. CMD_LED_CTRL  <pin no(1)>  <value(1)>
 		uint8_t commandcode = COMMAND_LED_CTRL;
 		SPI_SendData(SPI2, &commandcode, 1);
@@ -223,14 +223,6 @@ int main()
 			SPI_SendData(SPI2,&dummy_write,1);
 			uint8_t led_status;
 			SPI_ReceiveData(SPI2,&led_status,1);
-			/*
-			 * Steps for printing
-			 * 1. update linker flags:
-			 * -specs=rdimon.specs -lc -lrdimon
-			 * 2.Go to debug config. select the binary ,go to startup tab and paste the command "monitor arm semihosting enable" in the Run Commands box.
-			 * 3.related to application.c file is already done here.
-			 * 4.Exclude sysmem.c under startup from build.
-			 * */
 			printf("The LED status is %d \n",led_status);
 		}
 
