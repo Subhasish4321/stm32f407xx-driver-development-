@@ -336,6 +336,33 @@ void SPI_IRQPriorityConfig(uint8_t IRQNumber,uint32_t IRQPriority)
 	uint8_t shift_amount = (iprx_section*8) + (8 - NO_OF_PR_BITS_IMPLEMENTED);
 	*(NVIC_PR_BASEADDR + iprx) |= (IRQPriority  << ( shift_amount ) );
 }
+/**
+ * Data Send and receive APIs using Interrupts.
+ */
+void SPI_SendDataIT(SPI_Handle_t *pSPIHandle,uint8_t *pTxBuffer, uint32_t len)
+{
+	/*
+	 * 1. Save the buffer address and length information in some global variables.
+	 * 2. Mark the SPI state as busy in transmission so that so that no other
+	 * code can take over same SPI peripheral until transmission is over.
+	 * 3. Enable the TXEIE control bit to get interrupt whenever TXE flag is set in SR
+	 * 4.Data transmission will be handled by the ISR code.(Will implement later)
+	 */
+
+	 pSPIHandle->pTxBuffer = pTxBuffer;
+	 pSPIHandle->TxLen = len;
+
+	 pSPIHandle->TxState = SPI_BUSY_IN_TX;
+
+	 pSPIHandle->pSPIx->SPI_CR2 |= (1 << )
+	 while()
+
+
+}
+void SPI_ReceiveDataIT(SPI_Handle_t *pSPIHandle,uint8_t *pRxBuffer,uint32_t len)
+{
+
+}
 void SPI_IRQHandling(SPI_Handle_t *pHandle)
 {
 
