@@ -437,7 +437,7 @@ static void spi_txe_interrupt_handle(SPI_Handle_t *pSPIHandle)
 	if(! pSPIHandle->Txlen)
 	{
 		//TXlen 0 means SPI transmission is done
-		//inform that txe is over
+		//inform the application that txe is over SPI can be tunred off.
 
 	}
 }
