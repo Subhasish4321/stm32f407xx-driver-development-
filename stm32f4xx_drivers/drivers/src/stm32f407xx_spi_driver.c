@@ -385,5 +385,67 @@ uint8_t SPI_ReceiveDataIT(SPI_Handle_t *pSPIHandle,uint8_t *pRxBuffer,uint32_t l
  */
 void SPI_IRQHandling(SPI_Handle_t *pHandle)
 {
+    // First check the status reg to verify the interrupt cause
+	uint8_t temp1,temp2;
+	//check if it is due to TXE
+	temp1 = pHandle->pSPIx->SR & (1 << SPI_SR_TXE);
+	temp2 = pHandle->pSPIx->SPI_CR2 & (1 << SPI_CR2_TXEIE);
+	if(temp1 && temp2)
+	{
+		//Interrupt due to TXE
+		spi_txe_interrupt_handle();
+	}
+	//Check for RXNE
+	temp1 = pHandle->pSPIx->SR & (1 << SPI_SR_RXE);
+	temp2 = pHandle->pSPIx->SPI_CR2 & (1 << SPI_CR2_RXNEIE);
+	if(temp1 && temp2)
+	{
+		//Interrupt due to RXE
+		spi_rxe_interrupt_handle();
+	}
+	//We are ignoring the ERRIE based interrupt events as they are not applicable in this project.
+	//Check for Overrun error may occur in the ERRIE section.
+	temp1 = pHandle->pSPIx->SR & (1 << SPI_SR_OVR);
+	temp2 = pHandle->pSPIx->SPI_CR2 & (1 << SPI_CR2_ERRIE);
+	if(temp1 && temp2)
+	{
+		//Interrupt due to Overrun error.(Refer ref_manual for OVR err.)
+		spi_ovr_err_interrupt_handle();
+	}
+}
+
+/*Event based helper Functions. */
+static void spi_txe_interrupt_handle(SPI_Handle_t *pSPIHandle)
+{
+	if(pSPIx->SPI_CR1 & (1 << SPI_CR1_DFF) )
+	{
+		//16 Bits data frame format.
+		//before dereferencing using *(pointer type)we need to type cast to 16 bit pointer type to get 16 bit data.
+		pSPIHandle->pSPIx->SPI_DR = *((uint16_t*)pSPIHandle->pTxBuffer);
+		pSPIHandle->Txlen --;
+		pSPIHandle->Txlen --;
+		//Increment the buffer address for next data bytes
+		(uint16_t*)pSPIHandle->pTxBuffer++;// This simply means pTxBuffer is a pointer to a data which of unsigned int 16 bit data type.
+	}
+	else
+	{
+		//8 bit Data frame format.
+		pSPIHandle->pSPIx->SPI_DR = *pTxBuffer;
+		pSPIHandle->Txlen;
+		pSPIHandle->pTxBuffer++;
+	}
+	if(! pSPIHandle->Txlen)
+	{
+		//TXlen 0 means SPI transmission is done
+		//inform that txe is over
+
+	}
+}
+static void spi_rxe_interrupt_handle(SPI_Handle_t *pSPIHandle)
+{
+
+}
+static void spi_ovr_err_interrupt_handle(SPI_Handle_t *pSPIHandle)
+{
 
 }
