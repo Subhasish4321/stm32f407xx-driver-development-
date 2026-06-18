@@ -1,5 +1,5 @@
 /*
- * stm32f407xx_spi_driver.c
+ *  stm32f407xx_spi_driver.c
  *
  *  Created on: April 24, 2026
  *  Author: Subhasish Singha
@@ -339,7 +339,7 @@ void SPI_IRQPriorityConfig(uint8_t IRQNumber,uint32_t IRQPriority)
 /**
  * Data Send and receive APIs using Interrupts.
  */
-void SPI_SendDataIT(SPI_Handle_t *pSPIHandle,uint8_t *pTxBuffer, uint32_t len)
+uint8_t SPI_SendDataIT(SPI_Handle_t *pSPIHandle,uint8_t *pTxBuffer, uint32_t len)
 {
 	/*
 	 * 1. Save the buffer address and length information in some global variables.
@@ -348,23 +348,42 @@ void SPI_SendDataIT(SPI_Handle_t *pSPIHandle,uint8_t *pTxBuffer, uint32_t len)
 	 * 3. Enable the TXEIE control bit to get interrupt whenever TXE flag is set in SR
 	 * 4.Data transmission will be handled by the ISR code.(Will implement later)
 	 */
+     uint8_t state = pSPIHandle->TxState;
 
+     if(state != SPI_BUSY_IN_TX)
+     {
 	 pSPIHandle->pTxBuffer = pTxBuffer;
-	 pSPIHandle->TxLen = len;
+	 pSPIHandle->Txlen = len;
 
 	 pSPIHandle->TxState = SPI_BUSY_IN_TX;
 
-	 pSPIHandle->pSPIx->SPI_CR2 |= (1 << )
-	 while()
-
-
+	 pSPIHandle->pSPIx->SPI_CR2 |= (1 << SPI_CR2_TXEIE );
+     }
+     return state;
 }
-void SPI_ReceiveDataIT(SPI_Handle_t *pSPIHandle,uint8_t *pRxBuffer,uint32_t len)
+uint8_t SPI_ReceiveDataIT(SPI_Handle_t *pSPIHandle,uint8_t *pRxBuffer,uint32_t len)
 {
+	 uint8_t state = pSPIHandle->RxState;
 
+	 if(state != SPI_BUSY_IN_RX)
+	 {
+	 pSPIHandle->pRxBuffer = pRxBuffer;
+	 pSPIHandle->Rxlen = len;
+
+	 pSPIHandle->RxState = SPI_BUSY_IN_RX;
+
+	 pSPIHandle->pSPIx->SPI_CR2 |= (1 << SPI_CR2_RXNEIE );
+	 }
+	 return state;
 }
+/**
+ *  Event sequence:
+ *  Interrupt Triggered -> Understand which event caused the interrupt to trigger(Check SR)-->
+ *  1.Interupt is due to RXNE flag -> Handle RXNE event.
+ *  2.Interrupt is due to TXE flag -> Handle TXE event.
+ *  3.Interrupt is due to ERROR Flag -> Handle Error.
+ */
 void SPI_IRQHandling(SPI_Handle_t *pHandle)
 {
 
 }
-
