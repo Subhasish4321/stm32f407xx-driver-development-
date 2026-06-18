@@ -376,6 +376,9 @@ uint8_t SPI_ReceiveDataIT(SPI_Handle_t *pSPIHandle,uint8_t *pRxBuffer,uint32_t l
 	 }
 	 return state;
 }
+static void spi_ovr_err_interrupt_handle(SPI_Handle_t *pSPIHandle);
+static void spi_rxe_interrupt_handle(SPI_Handle_t *pSPIHandle);
+static void spi_txe_interrupt_handle(SPI_Handle_t *pSPIHandle);
 /**
  *  Event sequence:
  *  Interrupt Triggered -> Understand which event caused the interrupt to trigger(Check SR)-->
@@ -388,36 +391,36 @@ void SPI_IRQHandling(SPI_Handle_t *pHandle)
     // First check the status reg to verify the interrupt cause
 	uint8_t temp1,temp2;
 	//check if it is due to TXE
-	temp1 = pHandle->pSPIx->SR & (1 << SPI_SR_TXE);
+	temp1 = pHandle->pSPIx->SPI_SR & (1 << SPI_SR_TXE);
 	temp2 = pHandle->pSPIx->SPI_CR2 & (1 << SPI_CR2_TXEIE);
 	if(temp1 && temp2)
 	{
 		//Interrupt due to TXE
-		spi_txe_interrupt_handle();
+		spi_txe_interrupt_handle(pHandle);
 	}
 	//Check for RXNE
-	temp1 = pHandle->pSPIx->SR & (1 << SPI_SR_RXE);
+	temp1 = pHandle->pSPIx->SPI_SR & (1 << SPI_SR_RXNE);
 	temp2 = pHandle->pSPIx->SPI_CR2 & (1 << SPI_CR2_RXNEIE);
 	if(temp1 && temp2)
 	{
 		//Interrupt due to RXE
-		spi_rxe_interrupt_handle();
+		spi_rxe_interrupt_handle(pHandle);
 	}
 	//We are ignoring the ERRIE based interrupt events as they are not applicable in this project.
 	//Check for Overrun error may occur in the ERRIE section.
-	temp1 = pHandle->pSPIx->SR & (1 << SPI_SR_OVR);
+	temp1 = pHandle->pSPIx->SPI_SR & (1 << SPI_SR_OVR);
 	temp2 = pHandle->pSPIx->SPI_CR2 & (1 << SPI_CR2_ERRIE);
 	if(temp1 && temp2)
 	{
 		//Interrupt due to Overrun error.(Refer ref_manual for OVR err.)
-		spi_ovr_err_interrupt_handle();
+		spi_ovr_err_interrupt_handle(pHandle);
 	}
 }
 
 /*Event based helper Functions. */
 static void spi_txe_interrupt_handle(SPI_Handle_t *pSPIHandle)
 {
-	if(pSPIx->SPI_CR1 & (1 << SPI_CR1_DFF) )
+	if(pSPIHandle->pSPIx->SPI_CR1 & (1 << SPI_CR1_DFF) )
 	{
 		//16 Bits data frame format.
 		//before dereferencing using *(pointer type)we need to type cast to 16 bit pointer type to get 16 bit data.
@@ -430,14 +433,19 @@ static void spi_txe_interrupt_handle(SPI_Handle_t *pSPIHandle)
 	else
 	{
 		//8 bit Data frame format.
-		pSPIHandle->pSPIx->SPI_DR = *pTxBuffer;
-		pSPIHandle->Txlen;
+		pSPIHandle->pSPIx->SPI_DR = *(pSPIHandle->pTxBuffer);
+		pSPIHandle->Txlen --;
 		pSPIHandle->pTxBuffer++;
 	}
 	if(! pSPIHandle->Txlen)
 	{
 		//TXlen 0 means SPI transmission is done
 		//inform the application that txe is over SPI can be tunred off.
+		pSPIHandle->pSPIx->SPI_CR2 &= ~(1 << SPI_CR2_TXEIE);
+		pSPIHandle->pTxBuffer = NULL;
+		pSPIHandle->Txlen = 0;
+		pSPIHandle->TxState = SPI_READY;
+		SPI_ApplicationEventCallback(pSPIHandle,SPI_EVENT_TX_CMPLT);
 
 	}
 }
