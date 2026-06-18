@@ -184,12 +184,6 @@ typedef struct
 	uint32_t SPI_I2SCFGR;
 	uint32_t SPI_I2SPR;
 }SPI_RegDef_t;
-/*
- *SPI application Macros
- */
-#define SPI_READY   0
-#define  SPI_BUSY_IN_RX   1
-#define SPI_BUSY_IN_TX    2
 
 /*
  * Peripheral definitions (Peripheral base address type casted to xxxRegDef_t)
