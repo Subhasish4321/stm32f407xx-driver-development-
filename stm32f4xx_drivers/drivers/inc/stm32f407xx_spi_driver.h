@@ -107,6 +107,11 @@ void SPI_SSOE_Config(SPI_RegDef_t *pSPIx, uint8_t EnOrDi);
 void SPI_SendData(SPI_RegDef_t *pSPIx,uint8_t *pTxBuffer, uint32_t len);
 void SPI_ReceiveData(SPI_RegDef_t *pSPIx,uint8_t *pRxBuffer,uint32_t len);
 /**
+ * Interrupt based Data Send and receive APIs 
+ */
+void SPI_SendDataIT(SPI_Handle_t *pSPIHandle,uint8_t *pTxBuffer, uint32_t len);
+void SPI_ReceiveDataIT(SPI_Handle_t *pSPIHandle,uint8_t *pRxBuffer,uint32_t len);
+/**
  * IRQ Configuration and ISR Handling APIs
  */
 void SPI_IRQ_IT_Config(uint8_t IRQNumber,uint8_t EnorDis);
