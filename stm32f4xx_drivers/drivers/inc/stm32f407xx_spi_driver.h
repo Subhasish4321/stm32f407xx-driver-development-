@@ -31,7 +31,19 @@ typedef struct
 {
     SPI_RegDef_t *pSPIx; /* This holds the base address of the SPIx(x:0,1,2) peripheral to which the pin belongs */
     SPI_Config_t SPI_Config; /* This holds the SPI configuration settings */
+    uint8_t      *pTxBuffer; /* To store the app. Tx Buffer address */
+    uint8_t      *pRxBuffer; /* To store the app. Rx Buffer address */
+    uint32_t     Txlen; /* TO store TX Lenght*/
+    uint32_t     Rxlen; /* TO store RX Lenght*/
+    uint8_t      TxState; /* To store Tx state */
+    uint8_t      RxState; /* To store Rx state */
 } SPI_Handle_t;
+/*
+ *SPI application Macros
+ */
+#define  SPI_READY   0
+#define  SPI_BUSY_IN_RX   1
+#define  SPI_BUSY_IN_TX    2
 /**
  * SPI Device Modes Macros
  */
@@ -107,7 +119,7 @@ void SPI_SSOE_Config(SPI_RegDef_t *pSPIx, uint8_t EnOrDi);
 void SPI_SendData(SPI_RegDef_t *pSPIx,uint8_t *pTxBuffer, uint32_t len);
 void SPI_ReceiveData(SPI_RegDef_t *pSPIx,uint8_t *pRxBuffer,uint32_t len);
 /**
- * Interrupt based Data Send and receive APIs 
+ * Interrupt based Data Send and receive APIs
  */
 void SPI_SendDataIT(SPI_Handle_t *pSPIHandle,uint8_t *pTxBuffer, uint32_t len);
 void SPI_ReceiveDataIT(SPI_Handle_t *pSPIHandle,uint8_t *pRxBuffer,uint32_t len);
