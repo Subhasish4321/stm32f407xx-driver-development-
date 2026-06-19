@@ -12,6 +12,7 @@
 #include <stddef.h>
 
 #define __vo  volatile
+#define __weak __attribute__((weak))
 /*
  * ARM Cortex MX Processor NVIC ISERx(Interrupt Set Enable Registers) register Addresses
  * We can define the ISERs upto 7 but that's not required now hence making upto 3

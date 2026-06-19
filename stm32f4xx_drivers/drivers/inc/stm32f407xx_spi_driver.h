@@ -136,5 +136,16 @@ uint8_t SPI_ReceiveDataIT(SPI_Handle_t *pSPIHandle,uint8_t *pRxBuffer,uint32_t l
 void SPI_IRQ_IT_Config(uint8_t IRQNumber,uint8_t EnorDis);
 void SPI_IRQPriorityConfig(uint8_t IRQNumber,uint32_t IRQPriority);
 void SPI_IRQHandling(SPI_Handle_t *pHandle);
-
+void SPI_ClearOVRFlag(SPI_RegDef_t *pSPIx);
+void SPI_CloseTransmission(SPI_Handle_t *pSPIHandle);
+void SPI_CloseReception(SPI_Handle_t *pSPIHandle);
+/**
+ * Application Callback.
+ * Concept: The below function is to implemented on the application side i.e. it could have diff. defines for diff.requirement.
+ * So we will leave a weak implementation in the driver.c file and 
+ * the application will overwrite this function. We write a weak implementaion to prevent compiler errors.
+ * we can use the __attribute__((weak))
+ * attribute to define a weak function implementaion
+*/
+void SPI_ApplicationEventCallback(SPI_Handle_t *pSPIHandle,uint8_t app_event);
 #endif /* SRC_STM32F407XX_SPI_DRIVER_H_ */

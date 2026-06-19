@@ -441,19 +441,78 @@ static void spi_txe_interrupt_handle(SPI_Handle_t *pSPIHandle)
 	{
 		//TXlen 0 means SPI transmission is done
 		//inform the application that txe is over SPI can be tunred off.
-		pSPIHandle->pSPIx->SPI_CR2 &= ~(1 << SPI_CR2_TXEIE);
-		pSPIHandle->pTxBuffer = NULL;
-		pSPIHandle->Txlen = 0;
-		pSPIHandle->TxState = SPI_READY;
+		SPI_CloseTransmission(pSPIHandle);
 		SPI_ApplicationEventCallback(pSPIHandle,SPI_EVENT_TX_CMPLT);
 
 	}
 }
 static void spi_rxe_interrupt_handle(SPI_Handle_t *pSPIHandle)
 {
+	// check for DFF from CR1
+	if(pSPIHandle->pSPIx->SPI_CR1 & (1 << SPI_CR1_DFF) )
+	{
+		//16 Bits data frame format.
+		//before dereferencing using *(pointer type)we need to type cast to 16 bit pointer type to get 16 bit data.
+		*((uint16_t*)pSPIHandle->pRxBuffer) = pSPIHandle->pSPIx->SPI_DR;
+		pSPIHandle->RxLen --;
+		pSPIHandle->RxLen --;
+		//Increment the buffer address for next data bytes
+		(uint16_t*)pSPIHandle->pRxBuffer++;// This simply means pTxBuffer is a pointer to a data which of unsigned int 16 bit data type.
+	}
+	else
+	{
+		//8 bit Data frame format.
+		*((uint16_t*)pSPIHandle->pRxBuffer) = pSPIHandle->pSPIx->SPI_DR;
+		pSPIHandle->RxLen--;
+		pSPIHandle->pRxBuffer++;
+	}
+	if(! pSPIHandle->RxLen)
+	{
+		//This part makes the SPI ready for the next interrupt and lets the application side know that SPI communication is completed. 
+		SPI_CloseReception(pSPIHandle);
+		SPI_ApplicationEventCallback(pSPIHandle,SPI_EVENT_RX_CMPLT);
+	}
 
 }
 static void spi_ovr_err_interrupt_handle(SPI_Handle_t *pSPIHandle)
 {
+	uint8_t temp;
+     //Clear the OVR flag
+	if(pSPIHandle->TxState != SPI_BUSY_IN_TX)
+	{
+		//We can clear the OVR flag by just reading the SPI_DR And SPI_SR.
+		temp = pSPIHandle->pSPIx->SPI_DR;
+		temp = pSPIHandle->pSPIx->SPI_SR;
+	}
+	(void)temp;
+	 //Inform the application overrun error occured
+}
 
+void SPI_ClearOVRFlag(SPI_RegDef_t *pSPIx)
+{
+	uint8_t temp;
+	temp = pSPIx->SPI_DR;
+	temp = pSPIx->SPI_SR;
+	(void)temp;
+}
+void SPI_CloseTransmission(SPI_Handle_t *pSPIHandle)
+{
+	pSPIHandle->pSPIx->SPI_CR2 &= ~(1 << SPI_CR2_TXEIE);
+	pSPIHandle->pTxBuffer = NULL;
+	pSPIHandle->Txlen = 0;
+	pSPIHandle->TxState = SPI_READY;
+	SPI_ApplicationEventCallback(pSPIHandle,SPI_EVENT_TX_CMPLT);
+}
+void SPI_CloseReception(SPI_Handle_t *pSPIHandle)
+{
+	pSPIHandle->pSPIx->SPI_CR2 &= ~(1 << SPI_CR2_RXNEIE);
+	pSPIHandle->RxLen = 0;
+	pSPIHandle->pRxBuffer = NULL;
+	pSPIHandle->RxState = SPI_READY;
+	SPI_ApplicationEventCallback(pSPIHandle,SPI_EVENT_RX_CMPLT);
+}
+
+__weak void SPI_ApplicationEventCallback(SPI_Handle_t *pSPIHandle,uint8_t app_event)
+{
+	//if the application side does not implement a function for this weak function then by default this function is called.
 }
