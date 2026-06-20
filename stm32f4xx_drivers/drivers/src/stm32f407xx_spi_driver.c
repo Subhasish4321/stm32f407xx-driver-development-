@@ -454,8 +454,8 @@ static void spi_rxe_interrupt_handle(SPI_Handle_t *pSPIHandle)
 		//16 Bits data frame format.
 		//before dereferencing using *(pointer type)we need to type cast to 16 bit pointer type to get 16 bit data.
 		*((uint16_t*)pSPIHandle->pRxBuffer) = pSPIHandle->pSPIx->SPI_DR;
-		pSPIHandle->RxLen --;
-		pSPIHandle->RxLen --;
+		pSPIHandle->Rxlen --;
+		pSPIHandle->Rxlen --;
 		//Increment the buffer address for next data bytes
 		(uint16_t*)pSPIHandle->pRxBuffer++;// This simply means pTxBuffer is a pointer to a data which of unsigned int 16 bit data type.
 	}
@@ -463,10 +463,10 @@ static void spi_rxe_interrupt_handle(SPI_Handle_t *pSPIHandle)
 	{
 		//8 bit Data frame format.
 		*((uint16_t*)pSPIHandle->pRxBuffer) = pSPIHandle->pSPIx->SPI_DR;
-		pSPIHandle->RxLen--;
+		pSPIHandle->Rxlen--;
 		pSPIHandle->pRxBuffer++;
 	}
-	if(! pSPIHandle->RxLen)
+	if(! pSPIHandle->Rxlen)
 	{
 		//This part makes the SPI ready for the next interrupt and lets the application side know that SPI communication is completed. 
 		SPI_CloseReception(pSPIHandle);
@@ -506,7 +506,7 @@ void SPI_CloseTransmission(SPI_Handle_t *pSPIHandle)
 void SPI_CloseReception(SPI_Handle_t *pSPIHandle)
 {
 	pSPIHandle->pSPIx->SPI_CR2 &= ~(1 << SPI_CR2_RXNEIE);
-	pSPIHandle->RxLen = 0;
+	pSPIHandle->Rxlen = 0;
 	pSPIHandle->pRxBuffer = NULL;
 	pSPIHandle->RxState = SPI_READY;
 	SPI_ApplicationEventCallback(pSPIHandle,SPI_EVENT_RX_CMPLT);

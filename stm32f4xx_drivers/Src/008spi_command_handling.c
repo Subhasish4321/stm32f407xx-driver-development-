@@ -93,7 +93,7 @@ void SPI2_GPIOButtonInit(void)
 }
 uint8_t SPI_VerifyResponse(uint8_t ackbyte)
 {
-  if(ackbyte == 0x05)
+  if(ackbyte == 0xF5)
   {
     return 1;
   }
@@ -119,12 +119,12 @@ void make_shift_reg_ready_for_read(void)
  */
 int main()
 {
-	printf("Hello subha");
+	initialise_monitor_handles();
+	printf("Hello subha\n");
     uint8_t dummy_write = 0xff;// for 1 byte. For 2 bytes 0xffff
     uint8_t dummy_read;
     uint8_t ackbyte;
     uint8_t args[2];
-    initialise_monitor_handles();
     /*Initialize GPIO for SPI Configuration Pins*/
     SPI2_GPIOInit();
 
@@ -158,6 +158,7 @@ int main()
 		//Verify the ackbyte is valid or not
 		if (SPI_VerifyResponse(ackbyte))
 		{
+			printf("Received ACK %d \n",ackbyte);
 			args[0] = LED_PIN;
 			args[1] = LED_ON;
 
@@ -317,7 +318,7 @@ int main()
 
 		/*Disable SPI*/
 		SPI_EnableOrDisable(SPI2,DISABLE);
-		printf("SPI comm dfisabled \n");
+		printf("SPI comm disabled \n");
     }
     return 0;
 }
