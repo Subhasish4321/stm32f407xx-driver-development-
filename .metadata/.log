@@ -1,0 +1,45 @@
+!SESSION 2026-06-26 21:43:17.212 -----------------------------------------------
+eclipse.buildId=Version 1.19.0
+java.version=21.0.3
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=en_US
+Command-line arguments:  -os win32 -ws win32 -arch x86_64 -data C:\Users\ASUS\OneDrive\Documents\STM32 v20\stm32f407xx-driver-development-
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 4 4 2026-06-26 21:43:26.195
+!MESSAGE CubeMX plugin appears to be active, Log4j initialization might be too late.
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 1 1 2026-06-26 21:43:26.197
+!MESSAGE Log4j2 initialized with config file C:\Users\ASUS\OneDrive\Documents\STM32 v20\stm32f407xx-driver-development-\.metadata\.log4j2.xml
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2026-06-26 21:43:30.065
+!MESSAGE Started RMI Server, listening on port 41337
+!SESSION 2026-06-26 21:45:07.610 -----------------------------------------------
+eclipse.buildId=Version 1.19.0
+java.version=21.0.3
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=win32, ARCH=x86_64, WS=win32, NL=en_US
+Command-line arguments:  -os win32 -ws win32 -arch x86_64 -data C:\Users\ASUS\OneDrive\Documents\STM32 v20\stm32f407xx-driver-development-
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 4 4 2026-06-26 21:45:15.774
+!MESSAGE CubeMX plugin appears to be active, Log4j initialization might be too late.
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 1 1 2026-06-26 21:45:15.777
+!MESSAGE Log4j2 initialized with config file C:\Users\ASUS\OneDrive\Documents\STM32 v20\stm32f407xx-driver-development-\.metadata\.log4j2.xml
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2026-06-26 21:45:20.509
+!MESSAGE Started RMI Server, listening on port 41337
+
+!ENTRY org.eclipse.cdt.core 1 0 2026-06-26 21:46:42.550
+!MESSAGE Indexed 'STM32_Driver_Development_MCU1' (5 sources, 60 headers) in 1.51 sec: 2,448 declarations; 4,457 references; 0 unresolved inclusions; 1 syntax errors; 9 unresolved names (0.13%)
+
+!ENTRY org.eclipse.cdt.core 1 0 2026-06-26 21:52:57.027
+!MESSAGE Indexed 'STM32_Driver_Development_MCU1' (5 sources, 60 headers) in 0.467 sec: 2,448 declarations; 4,457 references; 0 unresolved inclusions; 1 syntax errors; 9 unresolved names (0.13%)
+
+!ENTRY org.eclipse.cdt.core 1 0 2026-06-26 22:00:15.414
+!MESSAGE Indexed 'stm32f407xx-driver-development-' (3 sources, 53 headers) in 0.72 sec: 1,954 declarations; 2,863 references; 0 unresolved inclusions; 2 syntax errors; 2 unresolved names (0.042%)
+
+!ENTRY org.eclipse.cdt.core 1 0 2026-06-26 22:09:38.176
+!MESSAGE Indexed 'stm32f407xx-driver-development-' (5 sources, 61 headers) in 0.319 sec: 2,427 declarations; 3,822 references; 0 unresolved inclusions; 1 syntax errors; 2 unresolved names (0.032%)
+
+!ENTRY org.eclipse.cdt.core 1 0 2026-06-26 22:11:23.906
+!MESSAGE Indexed 'stm32f407xx-driver-development-' (4 sources, 61 headers) in 0.351 sec: 2,425 declarations; 3,820 references; 0 unresolved inclusions; 1 syntax errors; 2 unresolved names (0.032%)

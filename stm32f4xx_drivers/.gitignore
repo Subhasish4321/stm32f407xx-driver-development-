@@ -1,0 +1,25 @@
+# Build output directories
+**/Debug/
+**/Release/
+
+# Object and dependency files
+*.o
+*.d
+*.su
+
+# Generated binaries
+*.elf
+*.hex
+*.bin
+*.map
+*.list
+
+# STM32CubeIDE generated makefiles
+*.mk
+
+# Temporary files
+*.tmp
+
+# OS files
+Thumbs.db
+.DS_Store
