@@ -96,9 +96,9 @@ typedef struct
 /**
  * Status Register flag Macros for masking.
  */
-#define SR_TXE_FLAG   (1 << SPI_SR_TXE)
-#define SR_RXNE_FLAG  (1 << SPI_SR_RXNE)
-#define SR_BUSY_FLAG  (1 << SPI_SR_BSY)
+#define SPI_SR_TXE_FLAG   (1 << SPI_SR_TXE)
+#define SPI_SR_RXNE_FLAG  (1 << SPI_SR_RXNE)
+#define SPI_SR_BUSY_FLAG  (1 << SPI_SR_BSY)
 
 /************************************************************************
  *        APIs supported by this driver

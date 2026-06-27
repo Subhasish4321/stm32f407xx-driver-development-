@@ -16,13 +16,13 @@
 /************************************************************************
  * @fn              - SPI_PeriClockControl
  *
- * @brief           - This function enables or disables peripheral clock for the given SPI port. 
+ * @brief           - This function enables or disables peripheral clock for the given SPI port.
  *
- * @param[in]       - 
- * @param[in]       - 
+ * @param[in]       -
+ * @param[in]       -
  * @param[in]       -
  *
- * @return          - 
+ * @return          -
  *
  * @Note            - In this driver file we have not implemented SPI4 although it is avialable in the MCU.
  *
@@ -65,10 +65,10 @@ void SPI_PeriClockControl(SPI_RegDef_t *pSPIx,uint8_t EnorDi)
  * @brief           - This function is used to initialize the SPI by configuring the registers.
  *
  * @param[in]       - *pSPIHandle which is pointer that holds the SPI configuration and pointer to the SPI(SPI1 or SPI 2..) being used.
- * @param[in]       - 
+ * @param[in]       -
  * @param[in]       -
  *
- * @return          - 
+ * @return          -
  *
  * @Note            - Remember that once SPE is set to 1, many bits in SPI_CR1 (like MSTR, CPOL, and CPHA)
  * become read-only or should not be changed,hence the SPE bit is not enabled in this module,it should be enable after
@@ -78,6 +78,7 @@ void SPI_PeriClockControl(SPI_RegDef_t *pSPIx,uint8_t EnorDi)
 
 void SPI_Init(SPI_Handle_t *pSPIHandle)
 {
+	SPI_PeriClockControl(pSPIHandle->pSPIx, ENABLE);
     /**
      *  Configure SPI_CR1 register
      */
@@ -128,7 +129,7 @@ void SPI_Init(SPI_Handle_t *pSPIHandle)
 	 *  Configure SPI_SR register if needed
 	 */
 }
-void SPI_EnableOrDisable(SPI_RegDef_t *pSPIx, uint8_t EnOrDi)
+void SPI_PeripheralControl(SPI_RegDef_t *pSPIx, uint8_t EnOrDi)
 {
 	if(EnOrDi == ENABLE)
 	{
@@ -181,7 +182,7 @@ void SPI_DeInit(SPI_RegDef_t *pSPIx)
 }
 
 /**
- * Data Send and receive APIs 
+ * Data Send and receive APIs
  */
 /*The below function */
 uint8_t SPI_GetFlagStatus(SPI_RegDef_t *pSPIx, uint32_t FlagName)
@@ -200,8 +201,8 @@ uint8_t SPI_GetFlagStatus(SPI_RegDef_t *pSPIx, uint32_t FlagName)
  *
  * @brief           - This function is used to send Data through SPI.
  *
- * @param[in]       - 
- * @param[in]       - 
+ * @param[in]       -
+ * @param[in]       -
  *
  * @Note            - This API is called a blocking API or Polling based API as this will wait until all the bytes are transmitted.
  *
@@ -223,7 +224,7 @@ void SPI_SendData(SPI_RegDef_t *pSPIx,uint8_t *pTxBuffer, uint32_t len)
     while(len > 0)
     {
     	//Wait until TXE is set
-    	while(!SPI_GetFlagStatus(pSPIx,SR_TXE_FLAG)){}
+    	while(!SPI_GetFlagStatus(pSPIx,SPI_SR_TXE_FLAG)){}
     	// check for DFF from CR1
     	if(pSPIx->SPI_CR1 & (1 << SPI_CR1_DFF) )
     	{
@@ -250,7 +251,7 @@ void SPI_ReceiveData(SPI_RegDef_t *pSPIx,uint8_t *pRxBuffer,uint32_t len)
 	 while(len > 0)
     {
     	//Wait until RXNE is set
-    	while(!SPI_GetFlagStatus(pSPIx,SR_RXNE_FLAG)){}
+    	while(!SPI_GetFlagStatus(pSPIx,SPI_SR_RXNE_FLAG)){}
     	// check for DFF from CR1
     	if(pSPIx->SPI_CR1 & (1 << SPI_CR1_DFF) )
     	{
@@ -265,7 +266,7 @@ void SPI_ReceiveData(SPI_RegDef_t *pSPIx,uint8_t *pRxBuffer,uint32_t len)
     	else
     	{
     		//8 bit Data frame format.
-    		*((uint16_t*)pRxBuffer) = pSPIx->SPI_DR;
+    		*pRxBuffer = pSPIx->SPI_DR;
     		len--;
     		pRxBuffer++;
     	}
@@ -276,17 +277,17 @@ void SPI_ReceiveData(SPI_RegDef_t *pSPIx,uint8_t *pRxBuffer,uint32_t len)
  * IRQ Configuration and ISR Handling APIs
  */
 /************************************************************************
- * @fn              - 
+ * @fn              -
  *
- * @brief           - This function 
+ * @brief           - This function
  *
- * @param[in]       - 
- * @param[in]       - 
+ * @param[in]       -
+ * @param[in]       -
  * @param[in]       -
  *
- * @return          - 
+ * @return          -
  *
- * @Note            - 
+ * @Note            -
  *
  */
 void SPI_IRQ_IT_Config(uint8_t IRQNumber,uint8_t EnorDis)
@@ -388,6 +389,8 @@ static void spi_txe_interrupt_handle(SPI_Handle_t *pSPIHandle);
  */
 void SPI_IRQHandling(SPI_Handle_t *pHandle)
 {
+//	printf("SPI_IRQHandling \n");
+
     // First check the status reg to verify the interrupt cause
 	uint8_t temp1,temp2;
 	//check if it is due to TXE
@@ -420,6 +423,7 @@ void SPI_IRQHandling(SPI_Handle_t *pHandle)
 /*Event based helper Functions. */
 static void spi_txe_interrupt_handle(SPI_Handle_t *pSPIHandle)
 {
+//	printf("txe_interupt_handle \n");
 	if(pSPIHandle->pSPIx->SPI_CR1 & (1 << SPI_CR1_DFF) )
 	{
 		//16 Bits data frame format.
@@ -442,12 +446,13 @@ static void spi_txe_interrupt_handle(SPI_Handle_t *pSPIHandle)
 		//TXlen 0 means SPI transmission is done
 		//inform the application that txe is over SPI can be tunred off.
 		SPI_CloseTransmission(pSPIHandle);
-		SPI_ApplicationEventCallback(pSPIHandle,SPI_EVENT_TX_CMPLT);
 
 	}
 }
 static void spi_rxe_interrupt_handle(SPI_Handle_t *pSPIHandle)
 {
+//	printf("rxe_interupt_handle \n");
+
 	// check for DFF from CR1
 	if(pSPIHandle->pSPIx->SPI_CR1 & (1 << SPI_CR1_DFF) )
 	{
@@ -462,15 +467,14 @@ static void spi_rxe_interrupt_handle(SPI_Handle_t *pSPIHandle)
 	else
 	{
 		//8 bit Data frame format.
-		*((uint16_t*)pSPIHandle->pRxBuffer) = pSPIHandle->pSPIx->SPI_DR;
+		*(pSPIHandle->pRxBuffer) = pSPIHandle->pSPIx->SPI_DR;
 		pSPIHandle->Rxlen--;
 		pSPIHandle->pRxBuffer++;
 	}
 	if(! pSPIHandle->Rxlen)
 	{
-		//This part makes the SPI ready for the next interrupt and lets the application side know that SPI communication is completed. 
+		//This part makes the SPI ready for the next interrupt and lets the application side know that SPI communication is completed.
 		SPI_CloseReception(pSPIHandle);
-		SPI_ApplicationEventCallback(pSPIHandle,SPI_EVENT_RX_CMPLT);
 	}
 
 }

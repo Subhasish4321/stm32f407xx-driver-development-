@@ -62,12 +62,12 @@ int main()
      */
     SPI_InternalSlaveSelectConfiguration(SPI2,ENABLE);
     //Enable SPI using the SPE bit
-    SPI_EnableOrDisable(SPI2,ENABLE);
+    SPI_PeripheralControl(SPI2,ENABLE);
     SPI_SendData(SPI2,(uint8_t*)data,strlen(data));
     /*Before we disable SPI we need to confirm SPI is not busy and we can do that by checking the BSY flag of SR register */
 	while(SPI_GetFlagStatus(SPI2, SR_BUSY_FLAG));//IF BSY bit is 1 SPI is Busy else free and we can Deactivate.
 
 	/*Disable SPI*/
-	SPI_EnableOrDisable(SPI2,DISABLE);
+	SPI_PeripheralControl(SPI2,DISABLE);
     return 0;
 }

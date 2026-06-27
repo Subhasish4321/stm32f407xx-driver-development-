@@ -144,7 +144,7 @@ int main()
 		SPI_SSOE_Config(SPI2,ENABLE);
 
 		/*Enable SPI*/
-		SPI_EnableOrDisable(SPI2,ENABLE);
+		SPI_PeripheralControl(SPI2,ENABLE);
         delay();
 		//1. CMD_LED_CTRL  <pin no(1)>  <value(1)>
 		uint8_t commandcode = COMMAND_LED_CTRL;
@@ -317,7 +317,7 @@ int main()
 		while(SPI_GetFlagStatus(SPI2, SR_BUSY_FLAG));//IF BSY bit is 1 SPI is Busy else free and we can Deactivate.
 
 		/*Disable SPI*/
-		SPI_EnableOrDisable(SPI2,DISABLE);
+		SPI_PeripheralControl(SPI2,DISABLE);
 		printf("SPI comm disabled \n");
     }
     return 0;
