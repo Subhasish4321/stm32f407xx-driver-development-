@@ -389,7 +389,6 @@ static void spi_txe_interrupt_handle(SPI_Handle_t *pSPIHandle);
  */
 void SPI_IRQHandling(SPI_Handle_t *pHandle)
 {
-//	printf("SPI_IRQHandling \n");
 
     // First check the status reg to verify the interrupt cause
 	uint8_t temp1,temp2;
@@ -423,7 +422,6 @@ void SPI_IRQHandling(SPI_Handle_t *pHandle)
 /*Event based helper Functions. */
 static void spi_txe_interrupt_handle(SPI_Handle_t *pSPIHandle)
 {
-//	printf("txe_interupt_handle \n");
 	if(pSPIHandle->pSPIx->SPI_CR1 & (1 << SPI_CR1_DFF) )
 	{
 		//16 Bits data frame format.
@@ -451,8 +449,6 @@ static void spi_txe_interrupt_handle(SPI_Handle_t *pSPIHandle)
 }
 static void spi_rxe_interrupt_handle(SPI_Handle_t *pSPIHandle)
 {
-//	printf("rxe_interupt_handle \n");
-
 	// check for DFF from CR1
 	if(pSPIHandle->pSPIx->SPI_CR1 & (1 << SPI_CR1_DFF) )
 	{

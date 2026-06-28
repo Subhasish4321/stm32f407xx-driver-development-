@@ -43,7 +43,6 @@
 /**
   * @I2C_FMDutyCycle
   */
-
 #define I2C_FM_2     0
 #define I2C_FM_16_9  1
 
@@ -64,7 +63,7 @@ uint8_t I2C_GetFlagStatus(I2C_RegDef_t *pI2Cx, uint32_t FlagName);
  */
 void I2C_Init(I2C_Handle_t *pI2CHandle);
 void I2C_DeInit(I2C_RegDef_t *pI2Cx);
-void I2C_EnableOrDisable(I2C_RegDef_t *pI2Cx, uint8_t EnOrDi);
+void I2C_PeripheralControl(I2C_RegDef_t *pI2Cx, uint8_t EnOrDi);
 /**
  * Data Send and receive APIs 
  */

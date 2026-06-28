@@ -387,7 +387,7 @@ typedef struct
 #define GPIO_PIN_RESET   0
 #define FLAG_SET       SET
 #define FLAG_RESET     RESET
-
+#define APB1_CLK_SPEED  0b010000
 /***********************************************************************
  * Bit Position Definitions of SPI Peripheral
  ***********************************************************************/
@@ -460,7 +460,7 @@ typedef struct
 
 #define I2C_CCR_CCR   0
 #define I2C_CCR_DUTY  14
-#define I2C_CCR_F5    15
+#define I2C_CCR_F_S    15  /* Fast or standard mode */
 
 
 #include "stm32f407xx_gpio_driver.h"

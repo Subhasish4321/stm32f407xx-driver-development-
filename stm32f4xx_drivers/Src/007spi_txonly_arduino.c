@@ -118,7 +118,7 @@ int main(void)
 		delay();
 
 		//enable the SPI2 peripheral
-		SPI_EnableOrDisable(SPI2,ENABLE);
+		SPI_PeripheralControl(SPI2,ENABLE);
 		
 		delay();
 		
@@ -132,7 +132,7 @@ int main(void)
 		//lets confirm SPI is not busy
 		while( SPI_GetFlagStatus(SPI2,SR_BUSY_FLAG) );
 		//Disable the SPI2 peripheral
-		SPI_EnableOrDisable(SPI2,DISABLE);;
+		SPI_PeripheralControl(SPI2,DISABLE);;
 	}
 
 	return 0;

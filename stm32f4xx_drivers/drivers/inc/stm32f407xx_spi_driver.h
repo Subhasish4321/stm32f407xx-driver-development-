@@ -117,7 +117,7 @@ uint8_t SPI_GetFlagStatus(SPI_RegDef_t *pSPIx, uint32_t FlagName);
  */
 void SPI_Init(SPI_Handle_t *pSPIHandle);
 void SPI_DeInit(SPI_RegDef_t *pSPIx);
-void SPI_EnableOrDisable(SPI_RegDef_t *pSPIx, uint8_t EnOrDi);
+void SPI_PeripheralControl(SPI_RegDef_t *pSPIx, uint8_t EnOrDi);
 void SPI_InternalSlaveSelectConfiguration(SPI_RegDef_t *pSPIx, uint8_t EnOrDi);
 void SPI_SSOE_Config(SPI_RegDef_t *pSPIx, uint8_t EnOrDi);
 /**

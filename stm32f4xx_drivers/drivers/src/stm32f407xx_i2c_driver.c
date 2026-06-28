@@ -5,6 +5,9 @@
  */
 
  #include "stm32f407xx.h"
+
+ uint16_t AHB1_PreScaler [8] = {2,4,8,16,64,128,256,512};
+ uint8_t APB1_PreScaler [4] = {2,4,8,16};
 /************************************************************************
  *        APIs supported by this driver
  * For more information about the APIs check the function definitions
@@ -52,30 +55,110 @@ void I2C_PeriClockControl(I2C_RegDef_t *pI2Cx,uint8_t EnorDi)
 //{
 //
 //}
+uint32_t RCC_GetPLLOutputClock()
+{
+    return 0;
+}
+uint32_t RCC_Get_PCLK1Value(void)
+{
+    uint32_t pclk1,SystemClk;
+    uint8_t clksrc,temp,ahb1p,apb1p;
+    clksrc = ((RCC->CFGR >> 2) & 0X3);
+    if(clksrc == 0)
+    {
+        SystemClk = 16000000;
+    }
+    else if(clksrc == 1)
+    {
+        SystemClk = 8000000;
+    }
+    else if (clksrc == 2)
+    {
+        SystemClk = RCC_GetPLLOutputClock();
+    }
+    //ahb1 pre scaler
+    temp = ((RCC->CFGR >> 4)& 0xF);
+    if(temp < 8)
+    {
+        ahb1p = 1;
+    }
+    else
+    {
+        ahb1p = AHB1_PreScaler[temp-8];
+    }  
+    //apb1 pre scaler.
+    temp = ((RCC->CFGR >> 10)& 0x7);
+    if(temp < 4)
+    {
+        apb1p = 1;
+    }
+    else
+    {
+        apb1p = APB1_PreScaler[temp-4];
+    }    
+    pclk1 = (SystemClk /ahb1p)/apb1p;
+
+    return  pclk1;
+}
 /*
  * Init and DeInit
+ * Note- Make sure to check the table 10 of ref man, it contains the min amd max permittable tLow ,tHigh and fscl pecifications.
+ * In the current scenario we have tL min= 4.7 micro sec and tH min =4.0 micro sec for standard mode.
+ * For fast mode tL min 1.3 and tH min 0.s micro sec. 
  */
 void I2C_Init(I2C_Handle_t *pI2CHandle)
 {
-    if(pI2CHandle->I2C_Config.I2C_SCLSpeed == I2C_SCL_SPEED_SM)
+    //ACK control fetch and assign.
+    uint32_t tempreg = 0;
+    tempreg |= pI2CHandle->I2C_Config.I2C_AckControl << I2C_CR1_ACK;
+    pI2CHandle->pI2Cx->I2C_CR1 = tempreg;
+
+    //Program frequency field of CR2
+    tempreg = 0;
+    tempreg = RCC_Get_PCLK1Value() /1000000;
+    pI2CHandle->pI2Cx->I2C_CR2 = (tempreg & 0x3F);
+
+    //Store the slave address in OAR
+    tempreg = 0;
+    tempreg |= (pI2CHandle->I2C_Config.I2C_DeviceAddress << 1);
+    tempreg |= (1 << 14);// done according to keep it always 1 acc. to ref manual
+    pI2CHandle->pI2Cx->I2C_OAR1 = tempreg;
+    
+    //CCR calculation
+    uint16_t ccr_value = 0;
+    tempreg = 0;
+    if(pI2CHandle->I2C_Config.I2C_SCLSpeed <= I2C_SCL_SPEED_SM)
     {
-        pI2CHandle->pI2Cx->I2C_CR2 |= (I2C_SCL_SPEED_SM << 5);
+        //Mode is standard mode,for formula of calculation see ref manual.
+        ccr_value = (RCC_Get_PCLK1Value()/ (2 * pI2CHandle->I2C_Config.I2C_SCLSpeed));
+        tempreg |= (ccr_value & 0xFFF); //Only bit to be considered for ccr value
+
     }
-    else if(pI2CHandle->I2C_Config.I2C_SCLSpeed == I2C_SCL_SPEED_FM2K)
+    else
     {
-        pI2CHandle->pI2Cx->I2C_CR2 |= (I2C_SCL_SPEED_FM2K << 5);
+        //Configure the mode s/m in ccr reg(15th bit)
+        tempreg |= (1 << I2C_CCR_F_S);
+        tempreg |= (pI2CHandle->I2C_Config.I2C_FMDutyCycle << I2C_CCR_DUTY);
+        if(pI2CHandle->I2C_Config.I2C_FMDutyCycle == I2C_FM_2 )
+        {
+            ccr_value = (RCC_Get_PCLK1Value()/ (3 * pI2CHandle->I2C_Config.I2C_SCLSpeed));
+        }
+        else 
+        {
+            ccr_value = (RCC_Get_PCLK1Value()/ (25 * pI2CHandle->I2C_Config.I2C_SCLSpeed));
+            
+        }
+        tempreg |= (ccr_value & 0xFFF); 
     }
-    else if(pI2CHandle->I2C_Config.I2C_SCLSpeed == I2C_SCL_SPEED_FM4K)
-    {
-        pI2CHandle->pI2Cx->I2C_CR2 |= (I2C_SCL_SPEED_FM4K << 5);
-    }
+    pI2CHandle->pI2Cx->I2C_CCR = tempreg ;
+    
 }
 void I2C_DeInit(I2C_RegDef_t *pI2Cx)
 {
     pI2Cx->I2C_CR1 = 0;
     pI2Cx->I2C_CCR = 0;
 }
-void I2C_EnableOrDisable(I2C_RegDef_t *pI2Cx, uint8_t EnOrDi)
+void I2C_PeripheralControl(I2C_RegDef_t *pI2Cx, uint8_t EnOrDi)
 {
     if(EnOrDi)
     {
