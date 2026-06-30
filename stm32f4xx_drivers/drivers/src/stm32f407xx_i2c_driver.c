@@ -143,6 +143,7 @@ uint32_t RCC_Get_PCLK1Value(void)
  */
 void I2C_Init(I2C_Handle_t *pI2CHandle)
 {
+    I2C_PeriClockControl(pI2CHandle->pI2Cx,ENABLE);
     //ACK control fetch and assign.
     uint32_t tempreg = 0;
     tempreg |= pI2CHandle->I2C_Config.I2C_AckControl << I2C_CR1_ACK;
@@ -186,7 +187,20 @@ void I2C_Init(I2C_Handle_t *pI2CHandle)
         tempreg |= (ccr_value & 0xFFF); 
     }
     pI2CHandle->pI2Cx->I2C_CCR = tempreg ;
-    
+
+    //TRISE Configuration
+    if(pI2CHandle->I2C_Config.I2C_SCLSpeed <= I2C_SCL_SPEED_SM)
+    {
+        //Standard mode according to I2c Bus Specification Max Trise is 1000ns.
+        // Formula to calculate TRISE = (Max Rise time acc. to I2c Specs/Tpclk1) + 1.
+        // => Fpclk1 * Max Rise time.
+        tempreg = ( RCC_Get_PCLK1Value()/1000000U ) + 1; // 1000 ns means 1 micro sec. => 10^-6
+    }
+    else
+    {
+        tempreg = ( ( RCC_Get_PCLK1Value()*300)/1000000000U ) + 1;// acc. to specs Max rise time for Fm is 300ns
+    }
+    pI2CHandle->pI2Cx->I2C_TRISE = (tempreg & 0x3F); //Masking bit 0 to 5
 }
 void I2C_DeInit(I2C_RegDef_t *pI2Cx)
 {

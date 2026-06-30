@@ -1,0 +1,6 @@
+{
+  "files.associations": {
+    "*.h": "c"
+  },
+  "C_Cpp.default.configuration": "STM32F4-Win32"
+}

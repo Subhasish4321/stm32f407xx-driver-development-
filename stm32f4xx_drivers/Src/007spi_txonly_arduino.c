@@ -44,7 +44,6 @@ void SPI2_GPIOInits(void)
 	SPIPins.GPIO_PinConfig.GPIO_PinOPType = GPIO_OP_TYPE_PP;
 	SPIPins.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_NO_PUPD;
 	SPIPins.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_FAST;
-	GPIO_PeriClockControl(GPIOB, ENABLE);
 	//SCLK
 	SPIPins.GPIO_PinConfig.GPIO_PinNumber = GPIO_PIN_NO_13;
 	GPIO_Init(&SPIPins);
@@ -76,7 +75,6 @@ void SPI2_Init(void)
     SPIHandle.SPI_Config.SPI_DFF = SPI_DFF_8BITS;
     SPIHandle.SPI_Config.SPI_SclkSpeed = SPI_SCK_SPEED_DIV256;
     SPIHandle.SPI_Config.SPI_SSM = SPI_SSM_DISABLE;//Hardware Slave management.
-    SPI_PeriClockControl(SPI2,ENABLE);
     SPI_Init(&SPIHandle);
 }
 void SPI2_GPIOButtonInit(void)
@@ -88,7 +86,6 @@ void SPI2_GPIOButtonInit(void)
 	GPIOBtn.GPIO_PinConfig.GPIO_PinOPType = GPIO_OP_TYPE_PP;
 	GPIOBtn.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_FAST;
 	GPIOBtn.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_NO_PUPD;
-	GPIO_PeriClockControl(GPIOA, ENABLE); //Enable peripheral clock.
 	GPIO_Init(&GPIOBtn);
 }
 
