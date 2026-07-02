@@ -5,7 +5,7 @@
  */
 
  #include "stm32f407xx.h"
-
+#include <stdio.h>
  uint16_t AHB1_PreScaler [8] = {2,4,8,16,64,128,256,512};
  uint8_t APB1_PreScaler [4] = {2,4,8,16};
 
@@ -18,18 +18,18 @@ static void I2C_GenerateStopCondition(I2C_RegDef_t *pI2Cx);
   */
  static void I2C_GenerateStartCondition(I2C_RegDef_t *pI2Cx)
  {
-     pI2Cx->CR1 |= (1 << I2C_CR1_START);
+     pI2Cx->I2C_CR1 |= (1 << I2C_CR1_START);
  }
  static void I2C_ExecuteAddressPhase(I2C_RegDef_t *pI2CX,uint8_t slaveAddress)
  {
      slaveAddress = slaveAddress << 1;
-     slaveAdress &= ~(1);
+     slaveAddress &= ~(1);
      pI2CX->I2C_DR = slaveAddress;
  }
  static void I2C_ClearADDRFlag(I2C_RegDef_t *pI2Cx)
  {
      uint32_t dummyRead = pI2Cx->I2C_SR1;
-     dummyRead = pI2Cx->I2C_SR1;
+     dummyRead = pI2Cx->I2C_SR2;
      (void) dummyRead;
  }
  static void I2C_GenerateStopCondition(I2C_RegDef_t *pI2Cx)
@@ -83,7 +83,7 @@ uint8_t I2C_GetFlagStatus(I2C_RegDef_t *pI2Cx, uint32_t FlagName)
 {
     if(pI2Cx->I2C_SR1 & FlagName)
     {
-        return FLAG_SET
+        return FLAG_SET;
     }
     else
     {
@@ -211,7 +211,7 @@ void I2C_PeripheralControl(I2C_RegDef_t *pI2Cx, uint8_t EnOrDi)
 {
     if(EnOrDi)
     {
-        pI2Cx->I2C_CR1 |= (1 << 0);
+        pI2Cx->I2C_CR1 |= (1 << I2C_CR1_PE);
     }
     else
     {
@@ -230,10 +230,10 @@ void I2C_MasterSendData(I2C_Handle_t *pI2CHandle, uint8_t *pTxBuffer,uint32_t le
     //Note: Until SB is cleared SCL will be stretched(pulled to LOW).
     //When SR1 SB bit is read the SB bit is cleared automatically and followed by witing the DR register.
     while(! I2C_GetFlagStatus(pI2CHandle->pI2Cx,I2C_FLAG_SR1_SB) );
-    
+
     //Send the 7 bit address of the slave with r/~w bit(r =1,w =0) (toatl 8 bits)
     //Address is written to address bits(1 - 7) bit 0(r/~w)
-    I2C_ExecuteAddressPhase(pI2CHandle->pI2CX,slaveAddress);
+    I2C_ExecuteAddressPhase(pI2CHandle->pI2Cx,slaveAddr);
 
     //confirm the address phase is completed by checking the ADDR flag SR1 register.
     while(! I2C_GetFlagStatus(pI2CHandle->pI2Cx,I2C_FLAG_SR1_ADDR));

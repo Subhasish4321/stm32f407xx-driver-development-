@@ -91,7 +91,7 @@ int main(void)
 		//to avoid button de-bouncing related issues 200ms of delay
 		delay();
         //Send some data to slave
-        I2C_MasterSendData(I2C1Handle,&master_data,strlen((char*)master_data),SLAVE_ADDRESS);
+        I2C_MasterSendData(&I2C1Handle,&master_data,strlen((char*)master_data),SLAVE_ADDRESS);
     }
     return 0;
 }
