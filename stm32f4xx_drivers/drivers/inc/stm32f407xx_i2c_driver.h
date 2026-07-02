@@ -70,9 +70,10 @@
  */
 void I2C_PeriClockControl(I2C_RegDef_t *pI2Cx,uint8_t EnorDi);
 /*
- * I2C Flag Status.
+ * I2C Flag Status and acking management
  */
 uint8_t I2C_GetFlagStatus(I2C_RegDef_t *pI2Cx, uint32_t FlagName);
+void I2C_ManageAcking(I2C_RegDef_t *pI2Cx,uin8_t EnOrDis);
 /*
  * Init and DeInit
  */
@@ -83,7 +84,7 @@ void I2C_PeripheralControl(I2C_RegDef_t *pI2Cx, uint8_t EnOrDi);
  * Data Send and receive APIs 
  */
 void I2C_MasterSendData(I2C_Handle_t *pI2CHandle, uint8_t *pTxBuffer,uint32_t len, uint8_t slaveAddr);
-
+void I2C_MasterReceiveData(I2C_Handle_t *pI2CHandle, uint8_t *pRxBuffer,uint8_t len, uint8_t slaveAddr);
 /**
  * IRQ Configuration and ISR Handling APIs
  */
