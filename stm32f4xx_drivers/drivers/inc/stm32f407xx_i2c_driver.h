@@ -34,7 +34,18 @@
 #define I2C_SCL_SPEED_SM    100000
 #define I2C_SCL_SPEED_FM4K  400000
 #define I2C_SCL_SPEED_FM2K  200000
-
+/**
+ * I2c repeated start control based macro
+ * When a I2C communication is done with a slave device, the master can either send a stop condition or a repeated start condition after the communication.
+ * If the master sends a stop condition, it releases the bus and the slave can communicate with other masters. If the master sends a repeated start condition, 
+ * it keeps control of the bus and can continue communicating with the same slave or switch to another slave without releasing the bus.
+ * Note:Sometimes if the master genearates a stop condition between two communication then another master can get control of the bus and can communicate with the slave device.
+ * This can lead to data loss or corruption. To avoid this, we can use repeated start condition.
+ * 
+ * Below macros helps to control the repeated start condition in the I2C communication.
+ */
+#define I2C_ENABLE_SR  1
+#define I2C_DISABLE_SR 0
 /**
   * @I2C_ACKControl
   */
@@ -83,8 +94,8 @@ void I2C_PeripheralControl(I2C_RegDef_t *pI2Cx, uint8_t EnOrDi);
 /**
  * Data Send and receive APIs 
  */
-void I2C_MasterSendData(I2C_Handle_t *pI2CHandle, uint8_t *pTxBuffer,uint32_t len, uint8_t slaveAddr);
-void I2C_MasterReceiveData(I2C_Handle_t *pI2CHandle, uint8_t *pRxBuffer,uint8_t len, uint8_t slaveAddr);
+void I2C_MasterSendData(I2C_Handle_t *pI2CHandle, uint8_t *pTxBuffer,uint32_t len, uint8_t slaveAddr,uint8_t RptStart);
+void I2C_MasterReceiveData(I2C_Handle_t *pI2CHandle, uint8_t *pRxBuffer,uint8_t len, uint8_t slaveAddr,uint8_t RptStart);
 /**
  * IRQ Configuration and ISR Handling APIs
  */

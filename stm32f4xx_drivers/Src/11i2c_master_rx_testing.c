@@ -18,8 +18,8 @@ void delay(void)
 }
 
 I2C_Handle_t I2C1Handle;
-//data
-uint8_t master_data[] = "We are testing the SPI Tx. \n";
+//rcv buffer
+uint8_t rcv_buf[32];
 /*
  * PB6 --> SCL
  * PB7 --> SDA   (changed from pb9 to pb7)
@@ -73,6 +73,8 @@ void GPIOButtonInit(void)
 
 int main(void)
 {
+    uint8_t commandcode;
+    uint8_t len;//for reading the length of the data to be received from slave
 	initialise_monitor_handles();
     //Button init
     GPIOButtonInit();
@@ -83,15 +85,27 @@ int main(void)
 
     //enable the i2c peripheral
     I2C_PeripheralControl(I2C1,ENABLE);
-    
+    //Ack bit is set to 1 after PE is set to 1 in CR1 register, so we need to set the ack bit after enabling the peripheral.
+    I2C_ManageAcking(I2C1, I2C_ACK_ENABLE);
+
     while(1)
 	{
 		//wait till button is pressed
 		while( ! GPIO_ReadFromInputPin(GPIOA,GPIO_PIN_NO_0) );
 		//to avoid button de-bouncing related issues 200ms of delay
 		delay();
-        //Send some data to slave
-        I2C_MasterSendData(&I2C1Handle,&master_data,strlen((char*)master_data),SLAVE_ADDRESS,I2C_DISABLE_SR);
+        commandcode = 0x51;
+        //send the command code 0x51 to the slave
+        I2C_MasterSendData(&I2C1Handle, &commandcode, 1, SLAVE_ADDRESS,I2C_ENABLE_SR);
+        //receive the length of the data to be received from slave
+        I2C_MasterReceiveData(&I2C1Handle, &len, 1, SLAVE_ADDRESS,I2C_ENABLE_SR);
+        //send the command code 0x52 to the slave
+        commandcode = 0x52;
+        I2C_MasterSendData(&I2C1Handle, &commandcode, 1, SLAVE_ADDRESS,I2C_ENABLE_SR);
+        //lets receive the data from the slave based on the length received from slave
+        I2C_MasterReceiveData(&I2C1Handle, rcv_buf, len, SLAVE_ADDRESS,I2C_DISABLE_SR);
+        rcv_buf[len+1] = '\0'; // Null-terminate the received data
+        printf("Data received is: %s\n", rcv_buf);
     }
     return 0;
 }

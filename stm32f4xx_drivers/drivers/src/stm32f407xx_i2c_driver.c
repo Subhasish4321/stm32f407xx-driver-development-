@@ -240,7 +240,7 @@ void I2C_PeripheralControl(I2C_RegDef_t *pI2Cx, uint8_t EnOrDi)
 /**
  * Data Send and receive APIs 
  */
-void I2C_MasterSendData(I2C_Handle_t *pI2CHandle, uint8_t *pTxBuffer,uint32_t len, uint8_t slaveAddr)
+void I2C_MasterSendData(I2C_Handle_t *pI2CHandle, uint8_t *pTxBuffer,uint32_t len, uint8_t slaveAddr,uint8_t RptStart)
 {
     //Generate the start condition
     I2C_GenerateStartCondition(pI2CHandle->pI2Cx);
@@ -273,11 +273,14 @@ void I2C_MasterSendData(I2C_Handle_t *pI2CHandle, uint8_t *pTxBuffer,uint32_t le
      while(! I2C_GetFlagStatus(pI2CHandle->pI2Cx,I2C_FLAG_SR1_TXE));  
      while(! I2C_GetFlagStatus(pI2CHandle->pI2Cx,I2C_FLAG_SR1_BTF));
 
-     //Generate the STOP condition
-     I2C_GenerateStopCondition(pI2CHandle->pI2Cx);
+     if(RptStart == I2C_DISABLE_SR)
+     {
+        //Generate the STOP condition
+        I2C_GenerateStopCondition(pI2CHandle->pI2Cx);
+     }
 }
 
-void I2C_MasterReceiveData(I2C_Handle_t *pI2CHandle, uint8_t *pRxBuffer,uint8_t len, uint8_t slaveAddr)
+void I2C_MasterReceiveData(I2C_Handle_t *pI2CHandle, uint8_t *pRxBuffer,uint8_t len, uint8_t slaveAddr,uint8_t RptStart)
 {
     //generate the start condition
     I2C_GenerateStartCondition(pI2CHandle->pI2Cx);
@@ -293,15 +296,17 @@ void I2C_MasterReceiveData(I2C_Handle_t *pI2CHandle, uint8_t *pRxBuffer,uint8_t 
     {
         //Disable acking before clearing the ADDR flag
         I2C_ManageAcking(pI2CHandle->pI2Cx,I2C_ACK_DISABLE);
-        //generate the stop condition
-        I2C_GenerateStopCondition(pI2CHandle->pI2Cx);
         //clear the addr flag
         I2C_ClearADDRFlag(pI2CHandle->pI2Cx);
         //Wait until RXNE=1
         while(! I2C_GetFlagStatus(pI2CHandle->pI2Cx,I2C_FLAG_SR1_RXNE));
+        if(RptStart == I2C_DISABLE_SR)
+        {
+            //generate the stop condition
+            I2C_GenerateStopCondition(pI2CHandle->pI2Cx);
+        }
         //read data in to buffer
         *pRxBuffer = pI2CHandle->pI2Cx->I2C_DR;
-        return;
     }
 
     //procedure to read more than 1 byte from slave
@@ -318,7 +323,10 @@ void I2C_MasterReceiveData(I2C_Handle_t *pI2CHandle, uint8_t *pRxBuffer,uint8_t 
             {
                 // clear the ack bit and generate the stop condition.
                 I2C_ManageAcking(pI2CHandle->pI2Cx,I2C_ACK_DISABLE);
-                I2C_GenerateStopCondition(pI2CHandle->pI2Cx);
+                if(RptStart == I2C_DISABLE_SR)
+                {
+                    I2C_GenerateStopCondition(pI2CHandle->pI2Cx);
+                }
             }
         }
         
