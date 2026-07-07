@@ -26,8 +26,23 @@
  {
     I2C_RegDef_t *pI2Cx;
     I2C_Config_t I2C_Config;
+    uint8_t      *pTxBuffer; /* To store the app. Tx Buffer address */
+    uint8_t      *pRxBuffer; /* To store the app. Rx Buffer address */
+    uint32_t     Txlen; /* TO store TX Lenght*/
+    uint32_t     Rxlen; /* TO store RX Lenght*/
+    uint8_t      TxRxState; /* To store Tx state */
+    uint8_t      DevAddr; /* To store the slave/device address */
+    uint32_t     RxSize; /* To store the receive size */
+    uint8_t      Sr; /* To store repeated start value */
  } I2C_Handle_t;
  
+ /**
+  * I2C Application states macros
+  */
+ #define I2C_READY 0
+ #define I2C_BUSY_IN_RX 1
+ #define I2C_BUSY_IN_TX 2
+
  /**
   * @I2C_SCLSpeed
   */
@@ -84,7 +99,7 @@ void I2C_PeriClockControl(I2C_RegDef_t *pI2Cx,uint8_t EnorDi);
  * I2C Flag Status and acking management
  */
 uint8_t I2C_GetFlagStatus(I2C_RegDef_t *pI2Cx, uint32_t FlagName);
-void I2C_ManageAcking(I2C_RegDef_t *pI2Cx,uin8_t EnOrDis);
+void I2C_ManageAcking(I2C_RegDef_t *pI2Cx,uint8_t EnOrDis);
 /*
  * Init and DeInit
  */
@@ -97,10 +112,17 @@ void I2C_PeripheralControl(I2C_RegDef_t *pI2Cx, uint8_t EnOrDi);
 void I2C_MasterSendData(I2C_Handle_t *pI2CHandle, uint8_t *pTxBuffer,uint32_t len, uint8_t slaveAddr,uint8_t RptStart);
 void I2C_MasterReceiveData(I2C_Handle_t *pI2CHandle, uint8_t *pRxBuffer,uint8_t len, uint8_t slaveAddr,uint8_t RptStart);
 /**
+ * Data Send and receive APIs using interrupt
+ */
+uint8_t I2C_MasterSendDataIT(I2C_Handle_t *pI2CHandle, uint8_t *pTxBuffer,uint32_t len, uint8_t slaveAddr,uint8_t RptStart);
+uint8_t I2C_MasterReceiveDataIT(I2C_Handle_t *pI2CHandle, uint8_t *pRxBuffer,uint8_t len, uint8_t slaveAddr,uint8_t RptStart);
+/**
  * IRQ Configuration and ISR Handling APIs
  */
 void I2C_IRQ_Interrupt_Config(uint8_t IRQNumber,uint8_t EnorDis);
 void I2C_IRQPriorityConfig(uint8_t IRQNumber,uint32_t IRQPriority);
+void I2C_EV_IRQHandling(I2C_Handle_t *pI2CHandle);
+void I2C_ER_IRQHandling(I2C_Handle_t *pI2CHandle);
 /**
  * Application Callback.
  * Concept: The below function is to implemented on the application side i.e. it could have diff. defines for diff.requirement.
