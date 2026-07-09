@@ -1,9 +1,11 @@
 LaunchTargetManager/org.eclipse.launchbar.core.launchTargetType.local,Local/arch=x86_64
 LaunchTargetManager/org.eclipse.launchbar.core.launchTargetType.local,Local/name=Local
 LaunchTargetManager/org.eclipse.launchbar.core.launchTargetType.local,Local/os=win32
-configDescList=org.eclipse.launchbar.core.descriptorType.default\:Debug_stm32f4xx_drivers.elf
+configDescList=org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:stm32f407xx-driver-development- Debug
 eclipse.preferences.version=1
 org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:STM32_Driver_Development_MCU1\ Debug/activeLaunchMode=run
 org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:STM32_Driver_Development_MCU1\ Debug/activeLaunchTarget=null\:---
+org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:stm32f407xx-driver-development-\ Debug/activeLaunchMode=run
+org.eclipse.cdt.dsf.gdb.gdbRemotedescriptorType\:stm32f407xx-driver-development-\ Debug/activeLaunchTarget=null\:---
 org.eclipse.launchbar.core.descriptorType.default\:Debug_stm32f4xx_drivers.elf/activeLaunchMode=run
 org.eclipse.launchbar.core.descriptorType.default\:Debug_stm32f4xx_drivers.elf/activeLaunchTarget=org.eclipse.launchbar.core.launchTargetType.local\:Local

@@ -1,0 +1,50 @@
+22:33:35 **** Build of configuration Debug for project STM32Driver_Development_MCU1 ****
+make -j8 all 
+arm-none-eabi-gcc -mcpu=cortex-m4 -g3 -DDEBUG -c -x assembler-with-cpp -MMD -MP -MF"Startup/startup_stm32f407vgtx.d" -MT"Startup/startup_stm32f407vgtx.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Startup/startup_stm32f407vgtx.o" "../Startup/startup_stm32f407vgtx.s"
+arm-none-eabi-gcc "../Src/001blinkled.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DSTM32 -DSTM32F407G_DISC1 -DSTM32F4 -DSTM32F407VGTx -c -I../Inc -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Src/001blinkled.d" -MT"Src/001blinkled.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Src/001blinkled.o"
+arm-none-eabi-gcc "../Src/002LedButton.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DSTM32 -DSTM32F407G_DISC1 -DSTM32F4 -DSTM32F407VGTx -c -I../Inc -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Src/002LedButton.d" -MT"Src/002LedButton.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Src/002LedButton.o"
+arm-none-eabi-gcc "../Src/003ExternalButtonLed.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DSTM32 -DSTM32F407G_DISC1 -DSTM32F4 -DSTM32F407VGTx -c -I../Inc -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Src/003ExternalButtonLed.d" -MT"Src/003ExternalButtonLed.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Src/003ExternalButtonLed.o"
+arm-none-eabi-gcc "../Src/004ExternalInterrupt.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DSTM32 -DSTM32F407G_DISC1 -DSTM32F4 -DSTM32F407VGTx -c -I../Inc -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Src/004ExternalInterrupt.d" -MT"Src/004ExternalInterrupt.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Src/004ExternalInterrupt.o"
+arm-none-eabi-gcc "../Src/007spi_txonly_arduino.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DSTM32 -DSTM32F407G_DISC1 -DSTM32F4 -DSTM32F407VGTx -c -I../Inc -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Src/007spi_txonly_arduino.d" -MT"Src/007spi_txonly_arduino.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Src/007spi_txonly_arduino.o"
+arm-none-eabi-gcc "../Src/008spi_command_handling.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DSTM32 -DSTM32F407G_DISC1 -DSTM32F4 -DSTM32F407VGTx -c -I../Inc -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Src/008spi_command_handling.d" -MT"Src/008spi_command_handling.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Src/008spi_command_handling.o"
+arm-none-eabi-gcc "../Src/009spi_message_rcv_it.c" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DSTM32 -DSTM32F407G_DISC1 -DSTM32F4 -DSTM32F407VGTx -c -I../Inc -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"Src/009spi_message_rcv_it.d" -MT"Src/009spi_message_rcv_it.o" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "Src/009spi_message_rcv_it.o"
+../Src/008spi_command_handling.c:1:10: fatal error: stm32f407xx.h: No such file or directory
+    1 | #include "stm32f407xx.h"
+      |          ^~~~~~~~~~~~~~~
+compilation terminated.
+../Src/004ExternalInterrupt.c:16:10: fatal error: stm32f407xx.h: No such file or directory
+   16 | #include "stm32f407xx.h"
+      |          ^~~~~~~~~~~~~~~
+compilation terminated.
+../Src/001blinkled.c:19:10: fatal error: stm32f407xx.h: No such file or directory
+   19 | #include "stm32f407xx.h"
+      |          ^~~~~~~~~~~~~~~
+compilation terminated.
+../Src/003ExternalButtonLed.c:8:10: fatal error: stm32f407xx_gpio_driver.h: No such file or directory
+    8 | #include "stm32f407xx_gpio_driver.h"
+      |          ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+compilation terminated.
+../Src/002LedButton.c:1:10: fatal error: stm32f407xx.h: No such file or directory
+    1 | #include "stm32f407xx.h"
+      |          ^~~~~~~~~~~~~~~
+compilation terminated.
+make: *** [Src/subdir.mk:55: Src/004ExternalInterrupt.o] Error 1
+make: *** Waiting for unfinished jobs....
+make: *** [Src/subdir.mk:55: Src/008spi_command_handling.o] Error 1
+make: *** [Src/subdir.mk:55: Src/001blinkled.o] Error 1
+make: *** [Src/subdir.mk:55: Src/003ExternalButtonLed.o] Error 1
+make: *** [Src/subdir.mk:55: Src/002LedButton.o] Error 1
+../Src/007spi_txonly_arduino.c:9:10: fatal error: stm32f407xx.h: No such file or directory
+    9 | #include "stm32f407xx.h"
+      |          ^~~~~~~~~~~~~~~
+compilation terminated.
+../Src/009spi_message_rcv_it.c:18:10: fatal error: stm32f407xx.h: No such file or directory
+   18 | #include "stm32f407xx.h"
+      |          ^~~~~~~~~~~~~~~
+compilation terminated.
+make: *** [Src/subdir.mk:55: Src/007spi_txonly_arduino.o] Error 1
+make: *** [Src/subdir.mk:55: Src/009spi_message_rcv_it.o] Error 1
+"make -j8 all" terminated with exit code 2. Build might be incomplete.
+
+22:33:37 Build Failed. 15 errors, 0 warnings. (took 1s.840ms)
+

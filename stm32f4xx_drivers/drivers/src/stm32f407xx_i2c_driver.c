@@ -27,7 +27,7 @@ static void I2C_GenerateStopCondition(I2C_RegDef_t *pI2Cx);
      slaveAddress &= ~(1);
      pI2CX->I2C_DR = slaveAddress;
  }
- static void I2C_ExecuteAddressPhaseRead(I2C_RegDef_t *pI2CX,uint8_t slaveAddress)
+ static void I2C_ExecuteAddressPhaseRead(I2C_RegDef_t *pI2Cx,uint8_t slaveAddress)
  {
     slaveAddress = slaveAddress << 1;
     slaveAddress |= 1; //r/~w bit = 1 for read
@@ -44,7 +44,7 @@ static void I2C_GenerateStopCondition(I2C_RegDef_t *pI2Cx);
     pI2Cx->I2C_CR1 |= (1 << I2C_CR1_STOP);
  }
 
- void I2C_ManageAcking(I2C_RegDef_t *pI2Cx,uin8_t EnOrDis)
+ void I2C_ManageAcking(I2C_RegDef_t *pI2Cx,uint8_t EnOrDis)
  {
     if(EnOrDis == I2C_ACK_ENABLE)
     {
@@ -356,7 +356,7 @@ void I2C_MasterReceiveData(I2C_Handle_t *pI2CHandle, uint8_t *pRxBuffer,uint8_t 
  * @Note              -  Complete the below code . Also include the function prototype in header file
 
  */
-uint8_t  I2C_MasterSendDataIT(I2C_Handle_t *pI2CHandle,uint8_t *pTxBuffer, uint32_t Len,uint8_t SlaveAddr,uint8_t Sr)
+uint8_t  I2C_MasterSendDataIT(I2C_Handle_t *pI2CHandle,uint8_t *pTxBuffer, uint32_t Len,uint8_t SlaveAddr,uint8_t RptStart)
 {
 
 	uint8_t busystate = pI2CHandle->TxRxState;
@@ -367,18 +367,18 @@ uint8_t  I2C_MasterSendDataIT(I2C_Handle_t *pI2CHandle,uint8_t *pTxBuffer, uint3
 		pI2CHandle->Txlen = Len;
 		pI2CHandle->TxRxState = I2C_BUSY_IN_TX;
 		pI2CHandle->DevAddr = SlaveAddr;
-		pI2CHandle->Sr = Sr;
+		pI2CHandle->Sr = RptStart;
 
 		//Implement code to Generate START Condition
 		I2C_GenerateStartCondition(pI2CHandle->pI2Cx);
 
 		//Implement the code to enable ITBUFEN Control Bit
-	    I2CHandle->pI2Cx->I2C_CR2 |= (1 << I2C_CR2_ITBUFEN);
+	    pI2CHandle->pI2Cx->I2C_CR2 |= (1 << I2C_CR2_ITBUFEN);
 		//Implement the code to enable ITEVTEN Control Bit
-		I2CHandle->pI2Cx->I2C_CR2 |= (1 << I2C_CR2_ITEVTEN);
+		pI2CHandle->pI2Cx->I2C_CR2 |= (1 << I2C_CR2_ITEVTEN);
 
 		//Implement the code to enable ITERREN Control Bit
-		I2CHandle->pI2Cx->I2C_CR2 |= (1 << I2C_CR2_ITERREN);
+		pI2CHandle->pI2Cx->I2C_CR2 |= (1 << I2C_CR2_ITERREN);
 
 	}
 
@@ -399,7 +399,7 @@ uint8_t  I2C_MasterSendDataIT(I2C_Handle_t *pI2CHandle,uint8_t *pTxBuffer, uint3
  * @Note              - Complete the below code . Also include the fn prototype in header file
 
  */
-uint8_t I2C_MasterReceiveDataIT(I2C_Handle_t *pI2CHandle,uint8_t *pRxBuffer, uint32_t Len, uint8_t SlaveAddr,uint8_t Sr)
+uint8_t I2C_MasterReceiveDataIT(I2C_Handle_t *pI2CHandle, uint8_t *pRxBuffer,uint8_t len, uint8_t slaveAddr,uint8_t RptStart)
 {
 
 	uint8_t busystate = pI2CHandle->TxRxState;
@@ -407,23 +407,23 @@ uint8_t I2C_MasterReceiveDataIT(I2C_Handle_t *pI2CHandle,uint8_t *pRxBuffer, uin
 	if( (busystate != I2C_BUSY_IN_TX) && (busystate != I2C_BUSY_IN_RX))
 	{
 		pI2CHandle->pRxBuffer = pRxBuffer;
-		pI2CHandle->Rxlen = Len;
+		pI2CHandle->Rxlen = len;
 		pI2CHandle->TxRxState = I2C_BUSY_IN_RX;
-		pI2CHandle->RxSize = Len; //Rxsize is used in the ISR code to manage the data reception 
-		pI2CHandle->DevAddr = SlaveAddr;
-		pI2CHandle->Sr = Sr;
+		pI2CHandle->RxSize = len; //Rxsize is used in the ISR code to manage the data reception
+		pI2CHandle->DevAddr = slaveAddr;
+		pI2CHandle->Sr = RptStart;
 
 		//Implement code to Generate START Condition
 		I2C_GenerateStartCondition(pI2CHandle->pI2Cx);
 
 		//Implement the code to enable ITBUFEN Control Bit
-		I2CHandle->pI2Cx->I2C_CR2 |= (1 << I2C_CR2_ITBUFEN);
+		pI2CHandle->pI2Cx->I2C_CR2 |= (1 << I2C_CR2_ITBUFEN);
 
 		//Implement the code to enable ITEVTEN Control Bit
-		I2CHandle->pI2Cx->I2C_CR2 |= (1 << I2C_CR2_ITEVTEN);
+		pI2CHandle->pI2Cx->I2C_CR2 |= (1 << I2C_CR2_ITEVTEN);
 
 		//Implement the code to enable ITERREN Control Bit
-		I2CHandle->pI2Cx->I2C_CR2 |= (1 << I2C_CR2_ITERREN);
+		pI2CHandle->pI2Cx->I2C_CR2 |= (1 << I2C_CR2_ITERREN);
 	}
 
 	return busystate;
