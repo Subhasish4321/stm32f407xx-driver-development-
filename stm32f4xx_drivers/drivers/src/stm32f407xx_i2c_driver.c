@@ -328,12 +328,13 @@ void I2C_MasterReceiveData(I2C_Handle_t *pI2CHandle, uint8_t *pRxBuffer,uint8_t 
                     I2C_GenerateStopCondition(pI2CHandle->pI2Cx);
                 }
             }
+            //read the data from DR in to buffer
+			*pRxBuffer = pI2CHandle->pI2Cx->I2C_DR;
+			//increment the buffer address
+			pRxBuffer++;
         }
         
-        //read the data from DR in to buffer
-        *pRxBuffer = pI2CHandle->pI2Cx->I2C_DR;
-        //increment the buffer address
-        pRxBuffer++;
+
     }
     //re-enable acking according to user choice.
     if(pI2CHandle->I2C_Config.I2C_AckControl == I2C_ACK_ENABLE)
