@@ -597,6 +597,18 @@ static void I2C_MasterHandleRXNEInterrupt(I2C_Handle_t *pI2CHandle)
 
 	}
 }
+
+/**
+ * Data Send and receive APIs for slave mode
+ */
+void I2C_MasterSendData(I2C_RegDef_t *pI2C, uint8_t data)
+{
+     pI2C->I2C_DR = data;
+}
+uint8_t I2C_MasterReceiveData(I2C_RegDef_t *pI2C)
+{
+    return (uint8_t)pI2C->I2C_DR;
+}
 /**
  * @brief This function handles the I2C event interrupt request.
  * @param pI2CHandle: Pointer to the I2C handle structure.
@@ -702,6 +714,14 @@ void I2C_EV_IRQHandling(I2C_Handle_t *pI2CHandle)
 			if(pI2CHandle->TxRxState == I2C_BUSY_IN_TX)
 				I2C_MasterHandleTXEInterrupt(pI2CHandle);
     	}
+        else
+        {
+            //slave
+            //make sure slave is really in transmitter mode by verifying the Transmitter/Receiver bit in SR2
+            if(pI2CHandle->pI2Cx->I2C_SR2 & (1 << I2C_SR2_TRA))
+                I2C_ApplicationEventCallback(pI2CHandle,I2C_EV_DATA_REQ);
+
+        }
     }
 
     temp3 = pI2CHandle->pI2Cx->I2C_SR1 & (1 << I2C_SR1_RXNE);
@@ -716,6 +736,13 @@ void I2C_EV_IRQHandling(I2C_Handle_t *pI2CHandle)
     		//the device is in master mode
 			if(pI2CHandle->TxRxState == I2C_BUSY_IN_RX)
 				I2C_MasterHandleRXNEInterrupt(pI2CHandle);
+        }
+        else
+        {
+            //Slave
+            //Verify the TRA bit is reset to make sure slave is in receiver mode
+            if(!(pI2CHandle->pI2Cx->I2C_SR2 & (1 << I2C_SR2_TRA)) )
+                I2C_ApplicationEventCallback(pI2CHandle,I2C_EV_DATA_RCV);
         }
     }
 }
@@ -765,7 +792,7 @@ void I2C_ER_IRQHandling(I2C_Handle_t *pI2CHandle)
 	temp1 = (pI2CHandle->pI2Cx->I2C_SR1) & ( 1 << I2C_SR1_AF);
 	if(temp1  && temp2)
 	{
-		//This is ACK failure error
+		//This is ACK failure error for both master and slave.
 
 	    //Implement the code to clear the ACK failure error flag
 		pI2CHandle->pI2Cx->I2C_SR1 &= ~I2C_FLAG_SR1_AF;

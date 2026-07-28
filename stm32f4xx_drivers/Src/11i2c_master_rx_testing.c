@@ -105,7 +105,7 @@ int main(void)
         I2C_MasterSendData(&I2C1Handle, &commandcode, 1, SLAVE_ADDRESS,I2C_ENABLE_SR);
         //lets receive the data from the slave based on the length received from slave
         I2C_MasterReceiveData(&I2C1Handle, rcv_buf, len, SLAVE_ADDRESS,I2C_DISABLE_SR);
-//        rcv_buf[len+1] = '\0'; // Null-terminate the received data
+        // rcv_buf[len+1] = '\0'; // Null-terminate the received data
         printf("Data received is: %s\n", rcv_buf);
     }
     return 0;
