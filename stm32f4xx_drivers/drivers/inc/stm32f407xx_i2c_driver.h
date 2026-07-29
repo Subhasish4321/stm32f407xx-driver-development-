@@ -101,6 +101,8 @@
 #define I2C_ERROR_TIMEOUT 7
 #define I2C_EV_DATA_REQ  8
 #define I2C_EV_DATA_RCV  9
+#define I2C_EV_DATA_REQ  8
+#define I2C_EV_DATA_RCV  9
 
 /************************************************************************
  *        APIs supported by this driver
@@ -130,8 +132,8 @@ void I2C_MasterReceiveData(I2C_Handle_t *pI2CHandle, uint8_t *pRxBuffer,uint8_t 
 /**
  * Data Send and receive APIs for slave mode
  */
-void I2C_MasterSendData(I2C_RegDef_t *pI2C, uint8_t data);
-uint8_t I2C_MasterReceiveData(I2C_RegDef_t *pI2C);
+void I2C_SlaveSendData(I2C_RegDef_t *pI2C, uint8_t data);
+uint8_t I2C_SlaveReceiveData(I2C_RegDef_t *pI2C);
 /**
  * Data Send and receive APIs using interrupt
  */
@@ -139,6 +141,8 @@ uint8_t I2C_MasterSendDataIT(I2C_Handle_t *pI2CHandle, uint8_t *pTxBuffer,uint32
 uint8_t I2C_MasterReceiveDataIT(I2C_Handle_t *pI2CHandle, uint8_t *pRxBuffer,uint8_t len, uint8_t slaveAddr,uint8_t RptStart);
 void I2C_CloseSendData(I2C_Handle_t *pI2CHandle);
 void I2C_CloseReceiveData(I2C_Handle_t *pI2CHandle);
+void I2C_GenerateStopCondition(I2C_RegDef_t *pI2Cx);
+
 /**
  * IRQ Configuration and ISR Handling APIs
  */
