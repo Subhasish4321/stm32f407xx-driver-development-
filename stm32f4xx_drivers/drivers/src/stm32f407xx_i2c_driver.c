@@ -79,6 +79,21 @@ static void I2C_MasterHandleTXEInterrupt(I2C_Handle_t *pI2CHandle);
     pI2Cx->I2C_CR1 |= (1 << I2C_CR1_STOP);
  }
 
+void I2C_SlaveEnableDisableCallbackEvents(I2C_RegDef_t *pI2Cx,uint8_t EnorDi)
+{
+    if(EnorDi == ENABLE)
+    {
+        pI2Cx->I2C_CR2 |= (1 << I2C_CR2_ITBUFEN);
+        pI2Cx->I2C_CR2 |= (1 << I2C_CR2_ITEVTEN);
+        pI2Cx->I2C_CR2 |= (1 << I2C_CR2_ITERREN);
+    }
+    else
+    {
+        pI2Cx->I2C_CR2 &= ~(1 << I2C_CR2_ITBUFEN);
+        pI2Cx->I2C_CR2 &= ~(1 << I2C_CR2_ITEVTEN);
+        pI2Cx->I2C_CR2 &= ~(1 << I2C_CR2_ITERREN);
+    }
+}
  void I2C_ManageAcking(I2C_RegDef_t *pI2Cx,uint8_t EnOrDis)
  {
     if(EnOrDis == I2C_ACK_ENABLE)

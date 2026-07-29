@@ -9,9 +9,8 @@
 #include "stm32f407xx.h"
 #include <stdio.h>
 
-#define MY_ADDRESS 0x61
 #define SLAVE_ADDRESS 0x68
-extern void initialise_monitor_handles();
+#define MY_ADDRESS SLAVE_ADDRESS
 void delay(void)
 {
 	for(uint32_t i = 0 ; i < 500000 ; i ++);
@@ -19,8 +18,7 @@ void delay(void)
 
 I2C_Handle_t I2C1Handle;
 //rcv buffer
-uint8_t rcv_buf[32];
-uint8_t rxComplt = RESET;
+uint8_t Tx_buf[32] = "STM32 Slave mode testing ...";
 /*
  * PB6 --> SCL
  * PB7 --> SDA   (changed from pb9 to pb7)
@@ -74,53 +72,24 @@ void GPIOButtonInit(void)
 
 int main(void)
 {
-    uint8_t commandcode;
-    uint8_t len;//for reading the length of the data to be received from slave
-	initialise_monitor_handles();
-    //Button init
+    //Gpio button init
     GPIOButtonInit();
     // Pin init
 	I2C_GPIOInits();
     //I2c configuration
     I2C1Init();
-    //Configure the IRQ NUMBERS
+    //Configure the IRQ NUMBERS ,this is required because the slave application is always in Interrupt mode.
     I2C_IRQ_Interrupt_Config(IRQ_NO_I2C1_EV,ENABLE);
     I2C_IRQ_Interrupt_Config(IRQ_NO_I2C1_ER,ENABLE);
+
+    I2C_SlaveEnableDisableCallbackEvents(I2C1,ENABLE);
     //enable the i2c peripheral
     I2C_PeripheralControl(I2C1,ENABLE);
     //Ack bit is set to 1 after PE is set to 1 in CR1 register, so we need to set the ack bit after enabling the peripheral.
     I2C_ManageAcking(I2C1, I2C_ACK_ENABLE);
 
-    while(1)
-	{
-		//wait till button is pressed
-		while( ! GPIO_ReadFromInputPin(GPIOA,GPIO_PIN_NO_0) );
-		//to avoid button de-bouncing related issues 200ms of delay
-		delay();
-        commandcode = 0x51;
-        //send the command code 0x51 to the slave
-        while(I2C_MasterSendDataIT(&I2C1Handle, &commandcode, 1, SLAVE_ADDRESS,I2C_ENABLE_SR)!= I2C_READY);
-        //receive the length of the data to be received from slave
-        while(I2C_MasterReceiveDataIT(&I2C1Handle, &len, 1, SLAVE_ADDRESS,I2C_ENABLE_SR)!= I2C_READY );
-        printf("the length received is: %d\n",len);
-        //send the command code 0x52 to the slave
-        commandcode = 0x52;
-        while(I2C_MasterSendDataIT(&I2C1Handle, &commandcode, 1, SLAVE_ADDRESS,I2C_ENABLE_SR)!= I2C_READY);
-        //lets receive the data from the slave based on the length received from slave
-        while(I2C_MasterReceiveDataIT(&I2C1Handle, rcv_buf, len, SLAVE_ADDRESS,I2C_DISABLE_SR)!= I2C_READY);
+    while(1);
 
-        rxComplt = RESET;//need to do this because in previous receive this gets set.
-        //Wait until Rx event completes
-        while(rxComplt!= SET)
-        {
-
-        }
-
-        rcv_buf[len+1] = '\0';
-
-        rxComplt = RESET;
-        printf("Data received is: %s\n", rcv_buf);
-    }
     return 0;
 }
 
@@ -133,26 +102,49 @@ void I2C1_ER_IRQHandler(void)
 	I2C_ER_IRQHandling(&I2C1Handle);
 }
 
+
 void I2C_ApplicationEventCallback(I2C_Handle_t *pI2CHandle,uint8_t app_event)
 {
-	if(app_event== I2C_EV_TX_CMPLT)
-	 {
-		 printf("Tx is completed\n");
-	 }else if (app_event== I2C_EV_RX_CMPLT)
-	 {
-		 printf("Rx is completed\n");
-		 rxComplt = SET;
-	 }else if (app_event== I2C_ERROR_AF)
-	 {
-		 printf("Error : Ack failure\n");
-		 //in master ack failure happens when slave fails to send ack for the byte
-		 //sent from the master.
-		 I2C_CloseSendData(pI2CHandle);
+    /**
+     * Concept: the commandCode and cnt are declared as static variables because we want to retain their values across multiple calls to this function.
+     * Since I2C_ApplicationEventCallback is called repeatedly by the IRQ handler on each I2C event, non-static locals would be re-initialized to 0 on every call.
+     */
+    static uint8_t commandCode = 0;
+    static uint8_t cnt = 0;
+	if(app_event == I2C_EV_DATA_REQ)
+    {
+        //Master wants to receive data, slave should send it.
+        if(commandCode == 0x51 )
+        {
+            //Send length information to master
+            I2C_SlaveSendData(pI2CHandle->pI2Cx, strlen((char*)Tx_buf));
+        }
+        else if(commandCode == 0x52)
+        {
+            //Concept:For each byte of data received master fires I2C_EV_DATA_REQ event until the entire data is received, so the cnt is increased on each call to this function and hence the next byte of data is sent to master.
+            //Send the data stored in TxBuf.
+            I2C_SlaveSendData(pI2CHandle->pI2Cx, Tx_buf[cnt++]);
+        }
+    }
+    else if(app_event == I2C_EV_DATA_RCV)
+    {
+        //This is the testing application for slave transmit and hence we are using the slave receive section only to receive the coomandcode to send the length and data only.
+        //Master has sent some data, slave should read it.
+        //Master sends the code 0x51 to send the length.
+        commandCode = I2C_SlaveReceiveData(pI2CHandle->pI2Cx);
 
-		 //generate the stop condition to release the bus
-		 I2C_GenerateStopCondition(I2C1);
-
-		 //Hang in infinite loop
-		 while(1);
-	 }
+    }
+    else if(app_event == I2C_ERROR_AF)
+    {
+        //This happens only during slave transmission.
+        //Master has sent NACK, so slave should understand that master does not want more data.
+        commandCode = 0xFF; //invalidate the command code, so that no data is sent.
+        cnt = 0;
+    }
+    else if(app_event == I2C_EV_STOP)
+    {
+        //This happens only in slave reception mode.This is not implemented because in this application we are not using the slave reception mode.
+        //Slave should understand that master has ended the communication.
+    }
+    
 }

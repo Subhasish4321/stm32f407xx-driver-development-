@@ -150,6 +150,8 @@ void I2C_IRQ_Interrupt_Config(uint8_t IRQNumber,uint8_t EnorDis);
 void I2C_IRQPriorityConfig(uint8_t IRQNumber,uint32_t IRQPriority);
 void I2C_EV_IRQHandling(I2C_Handle_t *pI2CHandle);
 void I2C_ER_IRQHandling(I2C_Handle_t *pI2CHandle);
+
+void I2C_SlaveEnableDisableCallbackEvents(I2C_RegDef_t *pI2Cx,uint8_t EnorDi);
 /**
  * Application Callback.
  * Concept: The below function is to implemented on the application side i.e. it could have diff. defines for diff.requirement.
