@@ -76,9 +76,12 @@
 							<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objcopy.symbolsrec.884384394" name="MCU Output Converter Motorola S-rec with symbols" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.objcopy.symbolsrec"/>
 						</toolChain>
 					</folderInfo>
+					<fileInfo id="com.st.stm32cube.ide.mcu.gnu.managedbuild.config.exe.debug.1117841940.1375825908" name="11i2c_master_rx_testing.c" rcbsApplicability="disable" resourcePath="Src/11i2c_master_rx_testing.c" toolsToInvoke="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.644391860.1668680185">
+						<tool id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.644391860.1668680185" name="MCU/MPU GCC Compiler" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.644391860"/>
+					</fileInfo>
 					<sourceEntries>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Inc"/>
-						<entry excluding="010i2c_master_tx_testing.c|009spi_message_rcv_it.c|syscalls.c|008spi_command_handling.c|spi_tx_testing.c|007spi_txonly_arduino.c|004ExternalInterrupt.c|003ExternalButtonLed.c|002LedButton.c|001blinkled.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Src"/>
+						<entry excluding="11i2c_master_rx_testing.c|010i2c_master_tx_testing.c|009spi_message_rcv_it.c|syscalls.c|008spi_command_handling.c|spi_tx_testing.c|007spi_txonly_arduino.c|004ExternalInterrupt.c|003ExternalButtonLed.c|002LedButton.c|001blinkled.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Src"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Startup"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="drivers/inc"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="drivers/src"/>

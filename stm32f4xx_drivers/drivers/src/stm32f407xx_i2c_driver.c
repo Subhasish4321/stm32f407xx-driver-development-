@@ -13,7 +13,6 @@ static void I2C_ExecuteAddressPhaseWrite(I2C_RegDef_t *pI2CX,uint8_t slaveAddres
 static void I2C_ExecuteAddressPhaseRead(I2C_RegDef_t *pI2CX,uint8_t slaveAddress);
 static void I2C_GenerateStartCondition(I2C_RegDef_t *pI2Cx);
 static void I2C_ClearADDRFlag(I2C_Handle_t *pI2CHandle);
-static void I2C_GenerateStopCondition(I2C_RegDef_t *pI2Cx);
 static void I2C_MasterHandleRXNEInterrupt(I2C_Handle_t *pI2CHandle);
 static void I2C_MasterHandleTXEInterrupt(I2C_Handle_t *pI2CHandle);
  /**
@@ -75,7 +74,7 @@ static void I2C_MasterHandleTXEInterrupt(I2C_Handle_t *pI2CHandle);
 		 (void)dummy_read;
 	 }
  }
- static void I2C_GenerateStopCondition(I2C_RegDef_t *pI2Cx)
+ void I2C_GenerateStopCondition(I2C_RegDef_t *pI2Cx)
  {
     pI2Cx->I2C_CR1 |= (1 << I2C_CR1_STOP);
  }
@@ -597,6 +596,19 @@ static void I2C_MasterHandleRXNEInterrupt(I2C_Handle_t *pI2CHandle)
 
 	}
 }
+
+
+/**
+ * Data Send and receive APIs for slave mode
+ */
+void I2C_SlaveSendData(I2C_RegDef_t *pI2C, uint8_t data)
+{
+     pI2C->I2C_DR = data;
+}
+uint8_t I2C_SlaveReceiveData(I2C_RegDef_t *pI2C)
+{
+    return (uint8_t)pI2C->I2C_DR;
+}
 /**
  * @brief This function handles the I2C event interrupt request.
  * @param pI2CHandle: Pointer to the I2C handle structure.
@@ -702,6 +714,14 @@ void I2C_EV_IRQHandling(I2C_Handle_t *pI2CHandle)
 			if(pI2CHandle->TxRxState == I2C_BUSY_IN_TX)
 				I2C_MasterHandleTXEInterrupt(pI2CHandle);
     	}
+    	else
+		{
+			//slave
+			//make sure slave is really in transmitter mode by verifying the Transmitter/Receiver bit in SR2
+			if(pI2CHandle->pI2Cx->I2C_SR2 & (1 << I2C_SR2_TRA))
+				I2C_ApplicationEventCallback(pI2CHandle,I2C_EV_DATA_REQ);
+
+		}
     }
 
     temp3 = pI2CHandle->pI2Cx->I2C_SR1 & (1 << I2C_SR1_RXNE);
@@ -717,6 +737,13 @@ void I2C_EV_IRQHandling(I2C_Handle_t *pI2CHandle)
 			if(pI2CHandle->TxRxState == I2C_BUSY_IN_RX)
 				I2C_MasterHandleRXNEInterrupt(pI2CHandle);
         }
+    	else
+		{
+			//Slave
+			//Verify the TRA bit is reset to make sure slave is in receiver mode
+			if(!(pI2CHandle->pI2Cx->I2C_SR2 & (1 << I2C_SR2_TRA)) )
+				I2C_ApplicationEventCallback(pI2CHandle,I2C_EV_DATA_RCV);
+		}
     }
 }
 /**
