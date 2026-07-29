@@ -757,7 +757,7 @@ void I2C_EV_IRQHandling(I2C_Handle_t *pI2CHandle)
 		{
 			//slave
 			//make sure that the slave is really in receiver mode
-			if(!(pI2CHandle->pI2Cx->SR2 & ( 1 << I2C_SR2_TRA)))
+			if(!(pI2CHandle->pI2Cx->I2C_SR2 & ( 1 << I2C_SR2_TRA)))
 			{
 				I2C_ApplicationEventCallback(pI2CHandle,I2C_EV_DATA_RCV);
 			}
