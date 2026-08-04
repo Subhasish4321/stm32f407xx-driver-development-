@@ -40,9 +40,9 @@
 /**
  * USART Mode Macros
  */
-#define USART_MODE_TX_RX 0
-#define USART_MODE_TX    1
-#define USART_MODE_RX    2
+#define USART_MODE_TX    0
+#define USART_MODE_RX    1
+#define USART_MODE_TXRX  2
 
 /**
  * USART Baud Rate Macros
@@ -56,6 +56,9 @@
 #define USART_BAUD_115200  115200
 #define USART_BAUD_230400  230400
 #define USART_BAUD_460800  460800
+#define USART_BAUD_921600  921600
+#define USART_BAUD_2M      2000000
+#define USART_BAUD_3M      3000000
 
 /**
  * USART Number of Stop Bits Macros
@@ -71,11 +74,14 @@
 #define USART_WORDLEN_8BITS  0
 #define USART_WORDLEN_9BITS  1
 
-/**
- * USART Parity Control Macros
+/*
+ *@USART_ParityControl
+ *Possible options for USART_ParityControl
  */
-#define USART_PARITY_EN_EVEN  0
-#define USART_PARITY_EN_ODD   1
+#define USART_PARITY_EN_ODD   2
+#define USART_PARITY_EN_EVEN  1
+#define USART_PARITY_DISABLE   0
+
 /**
  * USART Hardware Flow Control Macros
  */
@@ -84,95 +90,80 @@
 #define USART_HW_FLOW_CTRL_RTS   2
 #define USART_HW_FLOW_CTRL_CTS_RTS  3
 
+/**
+ * USART_CR1 Register Bit Position Macros
+ */
+#define USART_CR1_SBK    0 /* Send Break */
+#define USART_CR1_RWU    1 /* Receiver wakeup */
+#define USART_CR1_RE     2 /* Receiver enable */
+#define USART_CR1_TE     3 /* Transmitter enable */
+#define USART_CR1_IDLEIE 4 /* IDLE interrupt enable */
+#define USART_CR1_RXNEIE 5 /* RXNE interrupt enable */
+#define USART_CR1_TCIE   6 /* Transmission complete interrupt enable */
+#define USART_CR1_TXEIE  7 /* TXE interrupt enable */
+#define USART_CR1_PEIE   8 /* PE interrupt enable */
+#define USART_CR1_PS     9 /* Parity selection */
+#define USART_CR1_PCE    10 /* Parity control enable */
+#define USART_CR1_WAKE   11 /* Wakeup method */
+#define USART_CR1_M      12 /* Word length */
+#define USART_CR1_UE     13 /* USART enable */
+#define USART_CR1_OVER8  14 /* Oversampling by 8 */
 
 /**
- * Status Register flag Macros for masking.
+ * USART_SR Register Bit Position Macros
  */
-#define USART_FLAG_SR1_TXE    (1 << USART_SR1_TXE)
-#define USART_FLAG_SR1_RXNE   (1 << USART_SR1_RXNE)
-#define USART_FLAG_SR1_SB     (1 << USART_SR1_SB)
-#define USART_FLAG_SR1_ADDR   (1 << USART_SR1_ADDR)
-#define USART_FLAG_SR1_BTF    (1 << USART_SR1_BTF)
-#define USART_FLAG_SR1_STOPF  (1 << USART_SR1_STOPF)
-#define USART_FLAG_SR1_BERR   (1 << USART_SR1_BERR)
-#define USART_FLAG_SR1_ARLO   (1 << USART_SR1_ARLO)
-#define USART_FLAG_SR1_AF     (1 << USART_SR1_AF)
-#define USART_FLAG_SR1_OVR    (1 << USART_SR1_OVR)
-#define USART_FLAG_SR1_TIMEOUT  (1 << USART_SR1_TIMEOUT)
+#define USART_SR_PE     0 /* Parity error */
+#define USART_SR_FE     1 /* Framing error */
+#define USART_SR_NE     2 /* Noise error */
+#define USART_SR_ORE    3 /* Overrun error */
+#define USART_SR_IDLE   4 /* IDLE line detected */
+#define USART_SR_RXNE   5 /* Read data register not empty */
+#define USART_SR_TC     6 /* Transmission complete */
+#define USART_SR_TXE    7 /* Transmit data register empty */
+#define USART_SR_LBD    8 /* Local Interconnect Network(LIN) break detection */
+#define USART_SR_CTS    9 /* Clear To Send flag */
+/******************************************************************************************
+ *								APIs supported by this driver
+ *		 For more information about the APIs check the function definitions
+ ******************************************************************************************/
+/*
+ * Peripheral Clock setup
+ */
+void USART_PeriClockControl(USART_RegDef_t *pUSARTx, uint8_t EnorDi);
 
- /**
-  * USART Application event Macros
-  */
-#define USART_EV_TX_CMPLT 0
-#define USART_EV_RX_CMPLT 1
-#define USART_EV_STOP     2
-#define USART_ERROR_BERR  3
-#define USART_ERROR_ARLO  4
-#define USART_ERROR_AF    5
-#define USART_ERROR_OVR   6
-#define USART_ERROR_TIMEOUT 7
-#define USART_EV_DATA_REQ  8
-#define USART_EV_DATA_RCV  9
-#define USART_EV_DATA_REQ  8
-#define USART_EV_DATA_RCV  9
-
-/************************************************************************
- *        APIs supported by this driver
- * For more information about the APIs check the function definitions
- ************************************************************************/
 /*
- * peripheral Clock setup
- */
-void USART_PeriClockControl(USART_RegDef_t *pUSARTx,uint8_t EnorDi);
-/*
- * USART Flag Status and acking management
- */
-uint8_t USART_GetFlagStatus(USART_RegDef_t *pUSARTx, uint32_t FlagName);
-void USART_ManageAcking(USART_RegDef_t *pUSARTx,uint8_t EnOrDis);
-/*
- * Init and DeInit
+ * Init and De-init
  */
 void USART_Init(USART_Handle_t *pUSARTHandle);
 void USART_DeInit(USART_RegDef_t *pUSARTx);
+
+
+/*
+ * Data Send and Receive
+ */
+void USART_SendData(USART_RegDef_t *pUSARTx,uint8_t *pTxBuffer, uint32_t Len);
+void USART_ReceiveData(USART_RegDef_t *pUSARTx, uint8_t *pRxBuffer, uint32_t Len);
+uint8_t USART_SendDataIT(USART_Handle_t *pUSARTHandle,uint8_t *pTxBuffer, uint32_t Len);
+uint8_t USART_ReceiveDataIT(USART_Handle_t *pUSARTHandle, uint8_t *pRxBuffer, uint32_t Len);
+
+/*
+ * IRQ Configuration and ISR handling
+ */
+void USART_IRQInterruptConfig(uint8_t IRQNumber, uint8_t EnorDi);
+void USART_IRQPriorityConfig(uint8_t IRQNumber, uint32_t IRQPriority);
+void USART_IRQHandling(USART_Handle_t *pHandle);
+
+/*
+ * Other Peripheral Control APIs
+ */
 void USART_PeripheralControl(USART_RegDef_t *pUSARTx, uint8_t EnOrDi);
-/**
- * Data Send and receive APIs for master mode
- */
-void USART_MasterSendData(USART_Handle_t *pUSARTHandle, uint8_t *pTxBuffer,uint32_t len, uint8_t slaveAddr,uint8_t RptStart);
-void USART_MasterReceiveData(USART_Handle_t *pUSARTHandle, uint8_t *pRxBuffer,uint8_t len, uint8_t slaveAddr,uint8_t RptStart);
+uint8_t USART_GetFlagStatus(USART_RegDef_t *pUSARTx , uint32_t FlagName);
+void USART_ClearFlag(USART_RegDef_t *pUSARTx, uint16_t StatusFlagName);
 
-/**
- * Data Send and receive APIs for slave mode
+/*
+ * Application callback
  */
-void USART_SlaveSendData(USART_RegDef_t *pUSART, uint8_t data);
-uint8_t USART_SlaveReceiveData(USART_RegDef_t *pUSART);
-/**
- * Data Send and receive APIs using interrupt
- */
-uint8_t USART_MasterSendDataIT(USART_Handle_t *pUSARTHandle, uint8_t *pTxBuffer,uint32_t len, uint8_t slaveAddr,uint8_t RptStart);
-uint8_t USART_MasterReceiveDataIT(USART_Handle_t *pUSARTHandle, uint8_t *pRxBuffer,uint8_t len, uint8_t slaveAddr,uint8_t RptStart);
-void USART_CloseSendData(USART_Handle_t *pUSARTHandle);
-void USART_CloseReceiveData(USART_Handle_t *pUSARTHandle);
-void USART_GenerateStopCondition(USART_RegDef_t *pUSARTx);
-
-/**
- * IRQ Configuration and ISR Handling APIs
- */
-void USART_IRQ_Interrupt_Config(uint8_t IRQNumber,uint8_t EnorDis);
-void USART_IRQPriorityConfig(uint8_t IRQNumber,uint32_t IRQPriority);
-void USART_EV_IRQHandling(USART_Handle_t *pUSARTHandle);
-void USART_ER_IRQHandling(USART_Handle_t *pUSARTHandle);
-
-void USART_SlaveEnableDisableCallbackEvents(USART_RegDef_t *pUSARTx,uint8_t EnorDi);
-/**
- * Application Callback.
- * Concept: The below function is to implemented on the application side i.e. it could have diff. defines for diff.requirement.
- * So we will leave a weak implementation in the driver.c file and 
- * the application will overwrite this function. We write a weak implementaion to prevent compiler errors.
- * we can use the __attribute__((weak))
- * attribute to define a weak function implementaion
-*/
-void USART_ApplicationEventCallback(USART_Handle_t *pUSARTHandle,uint8_t app_event);
+void USART_ApplicationEventCallback(USART_Handle_t *pUSARTHandle,uint8_t AppEv);
 
 
 #endif /* --end of INC_STM32F407XX_USART_DRIVER_H_ ---*/

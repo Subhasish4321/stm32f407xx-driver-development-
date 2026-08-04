@@ -203,8 +203,24 @@ typedef struct
 	uint32_t I2C_TRISE; /* I2C TRISE register */
 }I2C_RegDef_t;
 
+/**
+ * USART Register definition structure for USARTx peripheral
+ */
+typedef struct
+{
+   uint32_t USART_SR; /*usart status register */
+   uint32_t USART_DR; /*usart data register */
+   uint32_t USART_BRR; /*Baud rate register*/
+   uint32_t USART_CR1; /*control register*/
+   uint32_t USART_CR2; /*control register*/
+   uint32_t USART_CR3; /*control register*/
+   uint32_t USART_GTPR; /*Guard time and prescaler register*/
+}USART_RegDef_t;
+
 /*
  * Peripheral definitions (Peripheral base address type casted to xxxRegDef_t)
+ * We need to type cast the base address to the register definition structure pointer. This is because the base address is 
+ * just a number but we need to access the registers of the peripheral which are defined in the register definition structure.
  */
 #define GPIOA  ((GPIO_RegDef_t*)GPIOA_BASEADDR)  /*type casted peripheral base address for GPIOA */
 #define GPIOB  ((GPIO_RegDef_t*)GPIOB_BASEADDR)
@@ -226,8 +242,15 @@ typedef struct
 #define SPI3    ((SPI_RegDef_t*)SPI3_BASEADDR) /*type casted peripheral base address for SPI3 */
 
 #define I2C1   ((I2C_RegDef_t*)I2C1_BASEADDR) /*Type casted peripheral base address for I2C1*/
-#define I2C2   ((I2C_RegDef_t*)I2C2_BASEADDR) /*Type casted peripheral base address for I2C1*/
-#define I2C3   ((I2C_RegDef_t*)I2C3_BASEADDR) /*Type casted peripheral base address for I2C1*/
+#define I2C2   ((I2C_RegDef_t*)I2C2_BASEADDR) /*Type casted peripheral base address for I2C2*/
+#define I2C3   ((I2C_RegDef_t*)I2C3_BASEADDR) /*Type casted peripheral base address for I2C3*/
+
+#define USART1 ((USART_RegDef_t*)USART1_BASEADDR) /*Type casted peripheral base address for USART1 */
+#define USART2 ((USART_RegDef_t*)USART2_BASEADDR) /*Type casted peripheral base address for USART2 */
+#define USART3 ((USART_RegDef_t*)USART3_BASEADDR) /*Type casted peripheral base address for USART3 */
+#define UART4 ((USART_RegDef_t*)UART4_BASEADDR) /*Type casted peripheral base address for UART4 */
+#define UART5 ((USART_RegDef_t*)UART5_BASEADDR) /*Type casted peripheral base address for UART5 */
+#define USART6 ((USART_RegDef_t*)USART6_BASEADDR) /*Type casted peripheral base address for USART6 */
 
 /*
  * Clock enable macros for GPIOx peripherals.
