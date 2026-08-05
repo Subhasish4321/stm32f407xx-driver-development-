@@ -6,8 +6,7 @@
 
  #include "stm32f407xx.h"
 #include <stdio.h>
- uint16_t AHB1_PreScaler [8] = {2,4,8,16,64,128,256,512};
- uint8_t APB1_PreScaler [4] = {2,4,8,16};
+ 
 
 static void I2C_ExecuteAddressPhaseWrite(I2C_RegDef_t *pI2CX,uint8_t slaveAddress);
 static void I2C_ExecuteAddressPhaseRead(I2C_RegDef_t *pI2CX,uint8_t slaveAddress);
@@ -159,51 +158,7 @@ uint8_t I2C_GetFlagStatus(I2C_RegDef_t *pI2Cx, uint32_t FlagName)
         return FLAG_RESET;
     }
 }
-uint32_t RCC_GetPLLOutputClock()
-{
-    return 0;
-}
-uint32_t RCC_Get_PCLK1Value(void)
-{
-    uint32_t pclk1,SystemClk;
-    uint8_t clksrc,temp,ahb1p,apb1p;
-    clksrc = ((RCC->CFGR >> 2) & 0X3);
-    if(clksrc == 0)
-    {
-        SystemClk = 16000000;
-    }
-    else if(clksrc == 1)
-    {
-        SystemClk = 8000000;
-    }
-    else if (clksrc == 2)
-    {
-        SystemClk = RCC_GetPLLOutputClock();
-    }
-    //ahb1 pre scaler
-    temp = ((RCC->CFGR >> 4)& 0xF);
-    if(temp < 8)
-    {
-        ahb1p = 1;
-    }
-    else
-    {
-        ahb1p = AHB1_PreScaler[temp-8];
-    }  
-    //apb1 pre scaler.
-    temp = ((RCC->CFGR >> 10)& 0x7);
-    if(temp < 4)
-    {
-        apb1p = 1;
-    }
-    else
-    {
-        apb1p = APB1_PreScaler[temp-4];
-    }    
-    pclk1 = (SystemClk /ahb1p)/apb1p;
 
-    return  pclk1;
-}
 /*
  * Init and DeInit
  * Note- Make sure to check the table 10 of UM10204.pdf I2C datasheet, it contains the min amd max permittable tLow ,tHigh and fscl pecifications.

@@ -19,6 +19,7 @@
     uint8_t USART_WordLength; // possible values from @USART_WordLength
     uint8_t USART_ParityControl; // possible values from @USART_ParityControl
     uint8_t USART_HWFlowControl; // possible values from @USART_HWFlowControl
+    uint8_t USART_OverSampling; // possible values from @USART_OverSampling
  } USART_Config_t;
 
  /**
@@ -44,6 +45,11 @@
 #define USART_MODE_RX    1
 #define USART_MODE_TXRX  2
 
+/**
+ * USART Oversampling Macros
+ */
+#define USART_OVR_SMPL_8  1
+#define USART_OVR_SMPL_16 0
 /**
  * USART Baud Rate Macros
  */
@@ -107,7 +113,22 @@
 #define USART_CR1_WAKE   11 /* Wakeup method */
 #define USART_CR1_M      12 /* Word length */
 #define USART_CR1_UE     13 /* USART enable */
-#define USART_CR1_OVER8  14 /* Oversampling by 8 */
+#define USART_CR1_OVER8  15 /* Oversampling by 8 */
+
+/**
+ * USART_CR2 Register Bit Position Macros
+ */
+#define USART_CR2_CPHA 9 /* Clock phase */
+#define USART_CR2_CPOL 10 /* Clock polarity */
+#define USART_CR2_CLKEN 11 /* Clock enable */
+#define USART_CR2_STOP 12 /* STOP bits */
+
+/**
+ * USART_CR3 Register Bit Position Macros
+ */
+#define USART_CR3_CTSIE 10 /* CTS interrupt enable */
+#define USART_CR3_CTSE 9 /* CTS enable */
+#define USART_CR3_RTSE 8 /* RTS enable */
 
 /**
  * USART_SR Register Bit Position Macros

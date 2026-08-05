@@ -7,7 +7,41 @@
 #include "stm32f407xx.h"
 #include <stdio.h>
 
+static USART_SetBaudRate(USART_Handle_t pUSARTx);
 
+/**
+ * this function sets the BSS register by calculating the Mantissa and fraction value
+ * based on the formula given in the reference manual.
+ * USARTDIV = fck/(8*(2-OVER8)*Baud) rate.
+ */
+static USART_SetBaudRate(USART_Handle_t pUSARTHandle)
+{
+    uint16_t mantissa;
+    uint8_t fraction;
+    float usartdiv = RCC_Get_PCLK2Value()/( 8 * (2 - pUSARTHandle->USART_Config.USART_OverSampling) * pUSARTHandle->USART_Config.USART_Baud);
+    mantissa = (uint16_t)usartdiv;
+    fraction = (uint8_t)(roundf((usartdiv - mantissa) * (8 * (2 - pUSARTHandle->USART_Config.USART_OverSampling))));
+    if(fraction > 7 && pUSARTHandle->USART_Config.USART_OverSampling == USART_OVR_SMPL_8)
+    {
+        mantissa++;
+        fraction = 0;
+    }
+    else if(fraction > 15 && pUSARTHandle->USART_Config.USART_OverSampling == USART_OVR_SMPL_16)
+    {
+        mantissa++;
+        fraction = 0;
+    }
+    if(pUSARTHandle->USART_Config.USART_OverSampling == USART_OVR_SMPL_8)
+    {
+        // Set the BRR register with mantissa and fraction values for oversampling by 8
+        pUSARTHandle->pUSARTx->USART_BRR = ((mantissa << 3) | (fraction & 0x7));
+    }
+    else
+    {
+        // Set the BRR register with mantissa and fraction values for oversampling by 16
+        pUSARTHandle->pUSARTx->USART_BRR = ((mantissa << 4) | (fraction & 0xf));
+    }
+}
 /*
  * Peripheral Clock setup
  */
@@ -93,16 +127,50 @@ void USART_Init(USART_Handle_t *pUSARTHandle)
         pUSARTHandle->pUSARTx->USART_CR1 |= (1 << USART_CR1_TE);
         pUSARTHandle->pUSARTx->USART_CR1 |= (1 << USART_CR1_RE);
     }
-
+    /*Initialise the OverSampling*/
+    pUSARTHandle->pUSARTx->USART_CR1 |= (pUSARTHandle->USART_Config.USART_OverSampling << USART_CR1_OVER8);
     /* Initialise the Baud */
-    if(pUSARTHandle->p)
-    USART_SetBaudRate(pUSARTHandle->pUSARTx, )
+    USART_SetBaudRate(pUSARTHandle);
     /* Initialise the NoOfStopBits*/
+    pUSARTHandle->pUSARTx->USART_CR2 |= (pUSARTHandle->USART_Config.USART_NoOfStopBits << USART_CR2_STOP);
     /* Initialise WordLength */
+    pUSARTHandle->pUSARTx->USART_CR1 |= (pUSARTHandle->USART_Config.USART_WordLength << USART_CR1_M);
     /* Initialise ParityControl */
+    if(pUSARTHandle->USART_Config.USART_ParityControl == USART_PARITY_DISABLE)
+    {
+        pUSARTHandle->pUSARTx->USART_CR1 &= ~(1 << USART_CR1_PCE );
+    }
+    else if(pUSARTHandle->USART_Config.USART_ParityControl == USART_PARITY_EN_EVEN)
+    {
+        pUSARTHandle->pUSARTx->USART_CR1 |= (1 << USART_CR1_PCE );
+        pUSARTHandle->pUSARTx->USART_CR1 &= ~(1 << USART_CR1_PS );
+    }
+    else if(pUSARTHandle->USART_Config.USART_ParityControl == USART_PARITY_EN_ODD)
+    {
+        pUSARTHandle->pUSARTx->USART_CR1 |= (1 << USART_CR1_PCE );
+        pUSARTHandle->pUSARTx->USART_CR1 |= (1 << USART_CR1_PS );
+    }
     /* Initialise HWFlowControl */
-
-
+    if(pUSARTHandle->USART_Config.USART_HWFlowControl == USART_HW_FLOW_CTRL_CTS )
+    {    
+        pUSARTHandle->pUSARTx->USART_CR3 &= ~(pUSARTHandle->USART_Config.USART_HWFlowControl << USART_CR3_RTSE);
+        pUSARTHandle->pUSARTx->USART_CR3 |= (pUSARTHandle->USART_Config.USART_HWFlowControl << USART_CR3_CTSE);
+    }
+    else if(pUSARTHandle->USART_Config.USART_HWFlowControl == USART_HW_FLOW_CTRL_RTS )
+    {
+        pUSARTHandle->pUSARTx->USART_CR3 &= ~(pUSARTHandle->USART_Config.USART_HWFlowControl << USART_CR3_CTSE);
+        pUSARTHandle->pUSARTx->USART_CR3 |= (pUSARTHandle->USART_Config.USART_HWFlowControl << USART_CR3_RTSE);
+    }
+    else if(pUSARTHandle->USART_Config.USART_HWFlowControl == USART_HW_FLOW_CTRL_CTS_RTS )
+    {
+        pUSARTHandle->pUSARTx->USART_CR3 |= (pUSARTHandle->USART_Config.USART_HWFlowControl << USART_CR3_RTSE);
+        pUSARTHandle->pUSARTx->USART_CR3 |= (pUSARTHandle->USART_Config.USART_HWFlowControl << USART_CR3_CTSE);
+    }
+    else
+    {
+        pUSARTHandle->pUSARTx->USART_CR3 &= ~(pUSARTHandle->USART_Config.USART_HWFlowControl << USART_CR3_CTSE);
+        pUSARTHandle->pUSARTx->USART_CR3 &= ~(pUSARTHandle->USART_Config.USART_HWFlowControl << USART_CR3_RTSE);
+    }
 
 }
 void USART_DeInit(USART_RegDef_t *pUSARTx)
@@ -193,7 +261,13 @@ void USART_PeripheralControl(USART_RegDef_t *pUSARTx, uint8_t EnOrDi)
 }
 uint8_t USART_GetFlagStatus(USART_RegDef_t *pUSARTx , uint32_t FlagName)
 {
-
+    if(pUSARTx->USART_SR & FlagName)
+    {
+        return FLAG_SET;
+    }
+    else{
+        return FLAG_RESET;
+    }
 }
 void USART_ClearFlag(USART_RegDef_t *pUSARTx, uint16_t StatusFlagName)
 {
