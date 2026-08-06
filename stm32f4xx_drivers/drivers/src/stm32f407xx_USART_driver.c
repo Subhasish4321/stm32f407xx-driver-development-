@@ -5,41 +5,60 @@
  */
 
 #include "stm32f407xx.h"
-#include <stdio.h>
 
-static USART_SetBaudRate(USART_Handle_t pUSARTx);
+static void USART_SetBaudRate(USART_Handle_t *pUSARTHandle);
 
 /**
- * this function sets the BSS register by calculating the Mantissa and fraction value
- * based on the formula given in the reference manual.
- * USARTDIV = fck/(8*(2-OVER8)*Baud) rate.
+ * This function programs BRR by splitting USARTDIV into mantissa and fraction
+ * according to the STM32F407 reference manual.
  */
-static USART_SetBaudRate(USART_Handle_t pUSARTHandle)
+static void USART_SetBaudRate(USART_Handle_t *pUSARTHandle)
 {
-    uint16_t mantissa;
-    uint8_t fraction;
-    float usartdiv = RCC_Get_PCLK2Value()/( 8 * (2 - pUSARTHandle->USART_Config.USART_OverSampling) * pUSARTHandle->USART_Config.USART_Baud);
-    mantissa = (uint16_t)usartdiv;
-    fraction = (uint8_t)(roundf((usartdiv - mantissa) * (8 * (2 - pUSARTHandle->USART_Config.USART_OverSampling))));
-    if(fraction > 7 && pUSARTHandle->USART_Config.USART_OverSampling == USART_OVR_SMPL_8)
+    uint32_t pclkx;
+    uint32_t usartdiv;
+    uint32_t mantissa;
+    uint32_t fraction;
+    uint32_t temp;
+
+    if(pUSARTHandle->pUSARTx == USART1 || pUSARTHandle->pUSARTx == USART6)
     {
-        mantissa++;
-        fraction = 0;
-    }
-    else if(fraction > 15 && pUSARTHandle->USART_Config.USART_OverSampling == USART_OVR_SMPL_16)
-    {
-        mantissa++;
-        fraction = 0;
-    }
-    if(pUSARTHandle->USART_Config.USART_OverSampling == USART_OVR_SMPL_8)
-    {
-        // Set the BRR register with mantissa and fraction values for oversampling by 8
-        pUSARTHandle->pUSARTx->USART_BRR = ((mantissa << 3) | (fraction & 0x7));
+        // PCLK2 is the clock source for USART1 and USART6
+        pclkx = RCC_Get_PCLK2Value();
     }
     else
     {
-        // Set the BRR register with mantissa and fraction values for oversampling by 16
-        pUSARTHandle->pUSARTx->USART_BRR = ((mantissa << 4) | (fraction & 0xf));
+        // PCLK1 is the clock source for USART2, USART3, UART4, and UART5
+        pclkx = RCC_Get_PCLK1Value();
+    }
+
+    if(pUSARTHandle->USART_Config.USART_OverSampling == USART_OVR_SMPL_8)
+    {
+        // Scale USARTDIV by 100 so the fractional part can be preserved in integer math.
+        usartdiv = (25U * pclkx) / (2U * pUSARTHandle->USART_Config.USART_Baud);
+    }
+    else
+    {
+        // For oversampling by 16, USARTDIV = fCK / (16 * baud).
+        usartdiv = (25U * pclkx) / (4U * pUSARTHandle->USART_Config.USART_Baud);
+    }
+
+    // Example: if scaled USARTDIV is 868, mantissa = 8 and temp = 68.
+    mantissa = usartdiv / 100U;
+    temp = usartdiv - (mantissa * 100U);
+
+    if(pUSARTHandle->USART_Config.USART_OverSampling == USART_OVR_SMPL_8)
+    {
+        // Convert the decimal remainder into 1/8 steps and round to the nearest value.
+        fraction = (((temp * 8U) + 50U) / 100U) & 0x07U;
+        // In OVER8 mode, BRR[15:4] holds mantissa and BRR[2:0] holds fraction.
+        pUSARTHandle->pUSARTx->USART_BRR = (mantissa << 4) | fraction;
+    }
+    else
+    {
+        // Convert the decimal remainder into 1/16 steps and round to the nearest value for rounding we add 50 before we divide.
+        fraction = (((temp * 16U) + 50U) / 100U) & 0x0FU;
+        // In OVER16 mode, BRR[15:4] holds mantissa and BRR[3:0] holds fraction.
+        pUSARTHandle->pUSARTx->USART_BRR = (mantissa << 4) | fraction;
     }
 }
 /*
@@ -182,11 +201,70 @@ void USART_DeInit(USART_RegDef_t *pUSARTx)
 /*
  * Data Send and Receive
  */
-void USART_SendData(USART_RegDef_t *pUSARTx,uint8_t *pTxBuffer, uint32_t Len)
+void USART_SendData(USART_Handle_t *pUSARTHandle,uint8_t *pTxBuffer, uint32_t Len)
 {
+    uint16_t *pdata;
+
+    if((pUSARTHandle->USART_Config.USART_WordLength == USART_WORDLEN_9BITS) &&
+       (pUSARTHandle->USART_Config.USART_ParityControl == USART_PARITY_DISABLE) &&
+       ((Len % 2U) != 0U))
+    {
+        return;
+    }
+
+    //Loop until Len number of Bytes is transferred
+    while(Len > 0)
+    {
+        //Wait until TXE is set
+        while(! USART_GetFlagStatus(pUSARTHandle->pUSARTx, (1 << USART_SR_TXE)));
+        //Check The USART word length ,(9 bit or 8 bit)
+        if(pUSARTHandle->USART_Config.USART_WordLength == USART_WORDLEN_9BITS)
+        {
+            pdata = (uint16_t*)pTxBuffer;
+            pUSARTHandle->pUSARTx->USART_DR = (*pdata & (uint16_t)0x01FF);
+            
+            //check for parity,because if parity is enabled and word length is 9 then the last bit will be the parity data & if disabled then all the 9 bits are data.
+            if(pUSARTHandle->USART_Config.USART_ParityControl == USART_PARITY_DISABLE)
+            {
+                pTxBuffer++;
+                pTxBuffer++;
+                Len--;
+                Len--; 
+                 
+            }
+            else
+            {
+                //8 bits data and 1 bit parity total 9 bits or 2 bytes. The hardware will replace the 9th bit with the parity value.
+                pTxBuffer++;
+                Len--;
+            }
+        }
+        else
+        {
+            // Usart word length 8 bit
+            if((pUSARTHandle->pUSARTx->USART_CR1 >> USART_CR1_PCE) &  0x1)
+            {
+                pUSARTHandle->pUSARTx->USART_DR = (*pTxBuffer & (uint8_t)0x7F);
+                pTxBuffer++;
+                Len--;
+            }
+            else
+            {
+                pUSARTHandle->pUSARTx->USART_DR = (*pTxBuffer & (uint8_t)0xFF);
+                pTxBuffer++;
+                Len--;
+            }
+            
+
+        }
+        
+    }
+    
+    //Wait until TC bit is set in the SR reg to mark that transmission is completed.
+     while(! USART_GetFlagStatus(pUSARTHandle->pUSARTx , (1 << USART_SR_TC)));
     
 }
-void USART_ReceiveData(USART_RegDef_t *pUSARTx, uint8_t *pRxBuffer, uint32_t Len)
+void USART_ReceiveData(USART_Handle_t *pUSARTHandle, uint8_t *pRxBuffer, uint32_t Len)
 {
     
 }
@@ -257,7 +335,14 @@ void USART_IRQHandling(USART_Handle_t *pHandle)
  */
 void USART_PeripheralControl(USART_RegDef_t *pUSARTx, uint8_t EnOrDi)
 {
-
+    if(EnOrDi == ENABLE)
+    {
+        pUSARTx->USART_CR1 |= (1 << USART_CR1_UE);
+    }
+    else
+    {
+        pUSARTx->USART_CR1 &= ~(1 << USART_CR1_UE);
+    }
 }
 uint8_t USART_GetFlagStatus(USART_RegDef_t *pUSARTx , uint32_t FlagName)
 {
@@ -265,13 +350,14 @@ uint8_t USART_GetFlagStatus(USART_RegDef_t *pUSARTx , uint32_t FlagName)
     {
         return FLAG_SET;
     }
-    else{
+    else
+    {
         return FLAG_RESET;
     }
 }
 void USART_ClearFlag(USART_RegDef_t *pUSARTx, uint16_t StatusFlagName)
 {
-
+    pUSARTx->USART_SR &= ~(StatusFlagName);
 }
 
 /*
