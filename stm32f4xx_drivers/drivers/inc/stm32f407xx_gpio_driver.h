@@ -93,6 +93,7 @@ typedef struct
 #define GPIO_ALT_FUN_MODE_4 4
 #define GPIO_ALT_FUN_MODE_5 5
 #define GPIO_ALT_FUN_MODE_6 6
+#define GPIO_ALT_FUN_MODE_7 7
 /************************************************************************
  *        APIs supported by this driver
  * For more information about the APIs check the function definitions

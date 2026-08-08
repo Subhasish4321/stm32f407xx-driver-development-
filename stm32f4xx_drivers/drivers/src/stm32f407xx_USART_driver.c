@@ -277,6 +277,7 @@ uint8_t USART_ReceiveDataIT(USART_Handle_t *pUSARTHandle, uint8_t *pRxBuffer, ui
     return 0;
 }
 
+/**
  * IRQ Configuration and ISR handling
  */
 void USART_IRQInterruptConfig(uint8_t IRQNumber, uint8_t EnorDi)

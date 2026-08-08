@@ -494,6 +494,7 @@ typedef struct
 #define I2C_CCR_F_S    15  /* Fast or standard mode */
 
 
+#include "stm32f407xx_rcc_driver.h"
 #include "stm32f407xx_USART_driver.h"
 #include "stm32f407xx_gpio_driver.h"
 #include "stm32f407xx_spi_driver.h"
