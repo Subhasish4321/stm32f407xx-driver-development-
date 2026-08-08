@@ -38,7 +38,7 @@ void USART_GPIOInits(void)
 void USART2Init(void)
 {
     USART2_Handle.pUSARTx = USART2;
-    USART2_Handle.USART_Config.USART_Baud = USART_STD_BAUD_115200;
+    USART2_Handle.USART_Config.USART_Baud = USART_BAUD_115200;
     USART2_Handle.USART_Config.USART_HWFlowControl = USART_HW_FLOW_CTRL_NONE;
     USART2_Handle.USART_Config.USART_Mode = USART_MODE_TX;
     USART2_Handle.USART_Config.USART_NoOfStopBits = USART_STOPBITS_1;
