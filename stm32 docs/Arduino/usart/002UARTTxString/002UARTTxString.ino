@@ -30,5 +30,5 @@ void loop() {
   //read the data
   char in_read=Serial.read();
   //print the data
-  Serial.print(changeCase(in_read));
+  Serial.print(in_read);
 }

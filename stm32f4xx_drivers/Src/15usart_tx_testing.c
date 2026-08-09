@@ -14,11 +14,11 @@ void delay(void)
     for(uint32_t i = 0 ; i < 500000 ; i ++);
 }
 USART_Handle_t USART2_Handle;
-uint8_t data[] = "Testing my first driver. \n";
+uint8_t data[] = "Congratulations to me ,I dit it. \n";
 void USART_GPIOInits(void)
 {
 	GPIO_Handle_t USARTPins;
-    USARTPins.pGPIOx = GPIOB;
+    USARTPins.pGPIOx = GPIOA;
     USARTPins.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_ALTFN;
     USARTPins.GPIO_PinConfig.GPIO_PinSpeed = GPIO_SPEED_FAST;         
 	USARTPins.GPIO_PinConfig.GPIO_PinPuPdControl	= GPIO_PIN_PU; 
