@@ -29,6 +29,11 @@
  {
     USART_RegDef_t *pUSARTx;
     USART_Config_t USART_Config;
+    uint8_t TxRxBusyState;
+    uint32_t TxLen;
+    uint32_t RxLen;
+    uint8_t *pTxBuffer;
+    uint8_t *pRxBuffer;
  } USART_Handle_t;
  
  /**
@@ -186,5 +191,9 @@ void USART_ClearFlag(USART_RegDef_t *pUSARTx, uint16_t StatusFlagName);
  */
 void USART_ApplicationEventCallback(USART_Handle_t *pUSARTHandle,uint8_t AppEv);
 
+/**
+ * Other error handling APIs
+ */
+void ErrorOverRun(void);
 
 #endif /* --end of INC_STM32F407XX_USART_DRIVER_H_ ---*/
