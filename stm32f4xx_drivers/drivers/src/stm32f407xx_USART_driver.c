@@ -252,13 +252,13 @@ void USART_SendData(USART_Handle_t *pUSARTHandle,uint8_t *pTxBuffer, uint32_t Le
             if((pUSARTHandle->pUSARTx->USART_CR1 >> USART_CR1_PCE) &  0x1)
             {
                //Note: There is a hard limitaion in this mode,that is we cannot send data that is more than 8 bit, i.e. maximum we can send 0x7F.
-                pUSARTHandle->pUSARTx->USART_DR = (*pTxBuffer & (uint8_t)0x7F);
+                pUSARTHandle->pUSARTx->USART_DR = (*pUSARTHandle->pTxBuffer & (uint8_t)0x7F);
                 pTxBuffer++;
                 Len--;
             }
             else
             {
-                pUSARTHandle->pUSARTx->USART_DR = (*pTxBuffer & (uint8_t)0xFF);
+                pUSARTHandle->pUSARTx->USART_DR = (*pUSARTHandle->pTxBuffer & (uint8_t)0xFF);
                 pTxBuffer++;
                 Len--;
             }
@@ -353,7 +353,7 @@ uint8_t USART_SendDataIT(USART_Handle_t *pUSARTHandle,uint8_t *pTxBuffer, uint32
 }
 uint8_t USART_ReceiveDataIT(USART_Handle_t *pUSARTHandle, uint8_t *pRxBuffer, uint32_t Len)
 {
-    uint8_t rxstate = pUSARTHandle->TxRxState;
+    uint8_t rxstate = pUSARTHandle->TxRxBusyState;
 
     if(rxstate != USART_BUSY_IN_RX)
     {
@@ -361,7 +361,7 @@ uint8_t USART_ReceiveDataIT(USART_Handle_t *pUSARTHandle, uint8_t *pRxBuffer, ui
         (void)pUSARTHandle->pUSARTx->USART_DR;
         
         pUSARTHandle->pUSARTx->USART_CR1 |= (1 << USART_CR1_RXNEIE);
-        pUSARTHandle->TxRxState = USART_BUSY_IN_RX;
+        pUSARTHandle->TxRxBusyState = USART_BUSY_IN_RX;
         pUSARTHandle->RxLen = Len;
         pUSARTHandle->pRxBuffer = pRxBuffer;
 
@@ -530,7 +530,7 @@ void USART_IRQHandling(USART_Handle_t *pUSARTHandle)
 				else
 				{
 					//This is 8bit data transfer
-					pUSARTHandle->pUSARTx->USART_DR = (*pTxBuffer  & (uint8_t)0xFF);
+					pUSARTHandle->pUSARTx->USART_DR = (*pUSARTHandle->pTxBuffer  & (uint8_t)0xFF);
 
 					//Implement the code to increment the buffer address
 					pUSARTHandle->pTxBuffer++;
@@ -540,7 +540,7 @@ void USART_IRQHandling(USART_Handle_t *pUSARTHandle)
 				}
 				
 			}
-			if (TxLen == 0 )
+			if (pUSARTHandle->TxLen == 0 )
 			{
 				//TxLen is zero 
 				//Implement the code to clear the TXEIE bit (disable interrupt for TXE flag )
@@ -578,8 +578,8 @@ void USART_IRQHandling(USART_Handle_t *pUSARTHandle)
 						*((uint16_t*) pUSARTHandle->pRxBuffer) = (pUSARTHandle->pUSARTx->USART_DR  & (uint16_t)0x01FF);
 
 						//Now increment the pRxBuffer two times
-						pRxBuffer++;
-						pRxBuffer++;
+						pUSARTHandle->pRxBuffer++;
+						pUSARTHandle->pRxBuffer++;
 						
 						//Implement the code to decrement the length
 						pUSARTHandle->RxLen-=2;
@@ -643,7 +643,7 @@ void USART_IRQHandling(USART_Handle_t *pUSARTHandle)
 //Note : CTS feature is not applicable for UART4 and UART5
 
 	//Implement the code to check the status of CTS bit in the SR
-	temp1 = USART_GetFlagStatus(pUSARTHandle->pUSARTx, (1 << USART_SR_CTS);
+	temp1 = USART_GetFlagStatus(pUSARTHandle->pUSARTx, (1 << USART_SR_CTS));
 	
 	//Implement the code to check the state of CTSE bit in CR1
 	temp2 = pUSARTHandle->pUSARTx->USART_CR3 & ( 1 << USART_CR3_CTSE);

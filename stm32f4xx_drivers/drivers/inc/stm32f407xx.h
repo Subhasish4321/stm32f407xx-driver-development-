@@ -387,6 +387,14 @@ typedef struct
  #define IRQ_NO_I2C1_ER  32
  #define IRQ_NO_I2C2_EV  33
  #define IRQ_NO_I2C2_ER  34
+ /**
+  * IRQ Number for USART
+  */
+ #define IRQ_NO_USART1  37
+ #define IRQ_NO_USART2  38
+ #define IRQ_NO_USART3  39
+ #define IRQ_NO_UART4   52
+ #define IRQ_NO_UART5   53
  
 /*
  * IRQ Priority

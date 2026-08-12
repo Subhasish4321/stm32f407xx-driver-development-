@@ -148,6 +148,17 @@
 #define USART_SR_TXE    7 /* Transmit data register empty */
 #define USART_SR_LBD    8 /* Local Interconnect Network(LIN) break detection */
 #define USART_SR_CTS    9 /* Clear To Send flag */
+
+ /**
+  * USART Application event Macros
+  */
+#define USART_EVENT_TX_CMPLT 0
+#define USART_EVENT_RX_CMPLT 1
+#define USART_EVENT_IDLE     2
+#define USART_EVENT_CTS      3
+#define USART_EVENT_ORE      4
+#define USART_ERREVENT_FE    5
+
 /******************************************************************************************
  *								APIs supported by this driver
  *		 For more information about the APIs check the function definitions
