@@ -252,13 +252,13 @@ void USART_SendData(USART_Handle_t *pUSARTHandle,uint8_t *pTxBuffer, uint32_t Le
             if((pUSARTHandle->pUSARTx->USART_CR1 >> USART_CR1_PCE) &  0x1)
             {
                //Note: There is a hard limitaion in this mode,that is we cannot send data that is more than 8 bit, i.e. maximum we can send 0x7F.
-                pUSARTHandle->pUSARTx->USART_DR = (*pUSARTHandle->pTxBuffer & (uint8_t)0x7F);
+                pUSARTHandle->pUSARTx->USART_DR = (*pTxBuffer & (uint8_t)0x7F);
                 pTxBuffer++;
                 Len--;
             }
             else
             {
-                pUSARTHandle->pUSARTx->USART_DR = (*pUSARTHandle->pTxBuffer & (uint8_t)0xFF);
+                pUSARTHandle->pUSARTx->USART_DR = (*pTxBuffer & (uint8_t)0xFF);
                 pTxBuffer++;
                 Len--;
             }
@@ -358,7 +358,7 @@ uint8_t USART_ReceiveDataIT(USART_Handle_t *pUSARTHandle, uint8_t *pRxBuffer, ui
     if(rxstate != USART_BUSY_IN_RX)
     {
         //Do a dummy read of DR to remove any stale RXNE flag before enabling the RXNE interrupt.
-        (void)pUSARTHandle->pUSARTx->USART_DR;
+//        (void)pUSARTHandle->pUSARTx->USART_DR;
         
         pUSARTHandle->pUSARTx->USART_CR1 |= (1 << USART_CR1_RXNEIE);
         pUSARTHandle->TxRxBusyState = USART_BUSY_IN_RX;
@@ -523,7 +523,6 @@ void USART_IRQHandling(USART_Handle_t *pUSARTHandle)
 						pUSARTHandle->pTxBuffer++;
 						
 						//Implement the code to decrement the length
-                        pUSARTHandle->pTxBuffer++;
 						pUSARTHandle->TxLen--;
 					}
 				}

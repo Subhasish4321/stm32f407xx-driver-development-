@@ -134,6 +134,7 @@
 #define USART_CR3_CTSIE 10 /* CTS interrupt enable */
 #define USART_CR3_CTSE 9 /* CTS enable */
 #define USART_CR3_RTSE 8 /* RTS enable */
+#define USART_CR3_EIE 0 /* Error Interrupt enable. */
 
 /**
  * USART_SR Register Bit Position Macros
@@ -157,7 +158,14 @@
 #define USART_EVENT_IDLE     2
 #define USART_EVENT_CTS      3
 #define USART_EVENT_ORE      4
-#define USART_ERREVENT_FE    5
+
+
+/**
+ * USART error event macros
+ */
+#define USART_ERREVENT_FE    0
+#define USART_ERREVENT_NE    1
+#define USART_ERREVENT_ORE   2
 
 /******************************************************************************************
  *								APIs supported by this driver

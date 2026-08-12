@@ -7,6 +7,7 @@
 #include "stm32f407xx.h"
 #include <stdio.h>
 
+extern void initialise_monitor_handles();
 void delay(void)
 {
     for(uint32_t i = 0 ; i < 500000 ; i ++);
@@ -63,6 +64,8 @@ volatile uint8_t rxstate = RESET;
 
 int main(void)
 {
+	initialise_monitor_handles();
+	printf("Printing\n");
     //Gpio button init
     GPIOButtonInit();
     // Pin init
@@ -93,7 +96,7 @@ int main(void)
         
         while(! rxstate);
 
-        rcv_data[strlen((char*)data)] = '\0';
+        rcv_data[sizeof(data)] = '\0';
         
         rxstate = RESET;
         printf("Data received is : %s \n", (char*)rcv_data);
