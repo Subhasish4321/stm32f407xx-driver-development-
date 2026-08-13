@@ -2,9 +2,16 @@
 #include <cstring.h>
 static void ds1307_i2c_pin_config(void);
 static void ds1307_i2c_config(void);
+static void ds1307_write(uint8_t data, uint8_t reg_addr);
+static uint8_t ds1307_read(uint8_t reg_addr);
+
 I2C_Handle_t g_Ds1307I2cHandle;
 
-void ds1307_init(void)
+/**
+ * @brief  Initializes the DS1307 RTC module.
+ * @retval Returns 0 if the clock is running, 1 if the clock is halted.
+ */
+uint8_t ds1307_init(void)
 {
     // Initialization code for DS1307
 
@@ -20,6 +27,11 @@ void ds1307_init(void)
     //4. Make clock halt(CH ) bit = 0 to start the clock.
         //Initially on power up the CH bit is set to 1 which means the clock is halted. So we need to clear this bit to start the clock.
     ds1307_write(0, DS1307_ADDR_SEC); 
+
+    //5. read back clock halt bit to check if the clock is running or not.
+    uint8_t clock_state = ds1307_read(DS1307_ADDR_SEC);
+
+    return ((clock_state >> 7 ) & 0x01) ; 
 }
 
 void ds1307_set_current_time(RTC_time_t *rtc_time)
@@ -82,8 +94,24 @@ static void ds1307_i2c_config(void)
     I2C_Init(&g_Ds1307I2cHandle);
 
 }
-
-void ds1307_write(uint8_t data, uint8_t reg_addr)
+/**
+ * Read data sheet to understand data write to slave(DS1307).
+ * I2C frame : |START|SLA+W|ACK|REG_ADDR|ACK|DATA|ACK|STOP|
+ * We directly write to the register of the DC1307 by sending the register address followed by the data to be written.
+ */
+static void ds1307_write(uint8_t data, uint8_t reg_addr)
 {
-    I2C_MasterSendData(&g_Ds1307I2cHandle, &data, 1, DS1307_I2C_ADDRESS, reg_addr);
+    uint8_t tx[2];
+    tx[0] = reg_addr;
+    tx[1] = data;
+    I2C_MasterSendData(&g_Ds1307I2cHandle, tx, 2, DS1307_I2C_ADDRESS, 0 );
+}
+
+static uint8_t ds1307_read(uint8_t reg_addr)
+{
+    uint8_t rec_data;
+    I2C_MasterSendData(&g_Ds1307I2cHandle, &reg_addr, 1, DS1307_I2C_ADDRESS, 0 );
+    I2C_MasterReceiveData(&g_Ds1307I2cHandle, &rec_data, 1, DS1307_I2C_ADDRESS, 0);
+
+    return rec_data;        
 }
