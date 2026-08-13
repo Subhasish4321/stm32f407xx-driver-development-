@@ -1,9 +1,15 @@
 #ifndef DS1307_H_
 #define DS1307_H_
 #include <stdint.h>
+#include "stm32f407xx.h"
 
 /* Application configurable items */
-#
+#define DS1307_I2C     I2C1
+#define DS1307_I2C_GPIO_PORT  GPIOB
+#define DS1307_I2C_SCL_PIN  GPIO_PIN_NO_6
+#define DS1307_I2C_SDA_PIN  GPIO_PIN_NO_7
+#define DS1307_I2C_SPEED  I2C_SCL_SPEED_SM 
+#define DS1307_I2C_PUPD  GPIO_PIN_PU //Used internal pull up resistors.
 
 /**
  * Register addresses for the DS1307 RTC chip.
@@ -30,6 +36,9 @@
 #define FRIDAY 6
 #define SATURDAY 7
 
+/* Register Bit position macros */
+#define DS1307_RTC_CLOCK_HALT 7
+
 typedef struct
 {
     uint8_t seconds;
@@ -54,5 +63,7 @@ void ds1307_get_current_time(RTC_time_t *rtc_time);
 
 void ds1307_set_current_date(RTC_date_t *rtc_date);
 void ds1307_get_current_date(RTC_date_t *rtc_date);
+
+void ds1307_write(uint8_t data, uint8_t reg_addr); /* This is a 8 bit chip so we can use uint8_t for address */
 
 #endif /* DS1307_H_ */
