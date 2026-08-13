@@ -37,6 +37,22 @@ uint8_t ds1307_init(void)
 void ds1307_set_current_time(RTC_time_t *rtc_time)
 {
     // Code to set current time
+    uint8_t seconds,hrs;
+    seconds = rtc_time->seconds;
+    seconds &=~(1 << DS1307_RTC_CLOCK_HALT); //Set the CH bit to 1 to halt the clock while setting the time.
+    ds1307_write(binary_to_bcd(seconds), DS1307_ADDR_SEC);
+    ds1307_write(binary_to_bcd(rtc_time->minutes), DS1307_ADDR_MIN);
+    hrs = binary_to_bcd(rtc_time->hours);
+    if(rtc_time->time_format == TIME_FORMAT_24HRS)
+    {
+        hrs &= ~(1 << 6); //Clear the 6th bit to set the 24 hour format.
+    }
+    else
+    {
+        hrs |= (1 << 6); 
+        hrs = (rtc_time->time_format == TIME_FORMAT_12HRS_AM) ? hrs & ~(1 << 5) : hrs |= (1 << 5) ;
+    }
+    ds1307_write(hrs, DS1307_ADDR_HOUR);
 }
 
 void ds1307_get_current_time(RTC_time_t *rtc_time)
