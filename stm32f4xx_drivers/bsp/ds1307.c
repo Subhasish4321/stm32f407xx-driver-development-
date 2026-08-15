@@ -4,6 +4,8 @@ static void ds1307_i2c_pin_config(void);
 static void ds1307_i2c_config(void);
 static void ds1307_write(uint8_t data, uint8_t reg_addr);
 static uint8_t ds1307_read(uint8_t reg_addr);
+static uint8_t binary_to_bcd(uint8_t binary);
+static uint8_t bcd_to_binary(uint8_t bcd);
 
 I2C_Handle_t g_Ds1307I2cHandle;
 
@@ -58,16 +60,69 @@ void ds1307_set_current_time(RTC_time_t *rtc_time)
 void ds1307_get_current_time(RTC_time_t *rtc_time)
 {
     // Code to get current time
+    uint8_t seconds, hrs, minutes;
+
+    seconds = ds1307_read(DS1307_ADDR_SEC);
+    seconds &= ~(1 << DS1307_RTC_CLOCK_HALT); //Clear the CH bit to get the actual seconds value.
+    rtc_time->seconds = bcd_to_binary(seconds);
+
+    minutes = ds1307_read(DS1307_ADDR_MIN);
+    rtc_time->minutes = bcd_to_binary(minutes);
+
+    hrs = ds1307_read(DS1307_ADDR_HOUR);
+    
+
+    if(hrs & (1 << 6))
+    {
+        //12 HRS MODE
+        if(hrs & (1 << 5))
+        {
+            rtc_time->time_format = TIME_FORMAT_12HRS_PM;
+        }
+        else
+        {
+            rtc_time->time_format = TIME_FORMAT_12HRS_AM;
+        }
+        hrs &= ~(0x3 << 5); //Clear the 5th and 6th bit to get the actual hours value in 12 hour format.
+    }
+    else
+    {
+        //24 HRS FORMAT
+        rtc_time->time_format = TIME_FORMAT_24HRS;
+    }
+    rtc_time->hours = bcd_to_binary(hrs);
+
 }
 
 void ds1307_set_current_date(RTC_date_t *rtc_date)
 {
     // Code to set current date
+    ds1307_write(binary_to_bcd(rtc_date->day) ,DS1307_ADDR_DAY);
+
+    ds1307_write(binary_to_bcd(rtc_date->date),DS1307_ADDR_DATE);
+
+    ds1307_write(binary_to_bcd(rtc_date->month),DS1307_ADDR_MONTH);
+
+    ds1307_write(binary_to_bcd(rtc_date->year),DS1307_ADDR_YEAR);
+
 }
 
 void ds1307_get_current_date(RTC_date_t *rtc_date)
 {
     // Code to get current date
+    uint8_t day, date, month, year;
+    day = ds1307_read(DS1307_ADDR_DAY);
+    rtc_date->day = bcd_to_binary(day);
+
+    date = ds1307_read(DS1307_ADDR_DATE);
+    rtc_date->date = bcd_to_binary(date);
+
+    month = ds1307_read(DS1307_ADDR_MONTH);
+    rtc_date->month = bcd_to_binary(month);
+
+    year = ds1307_read(DS1307_ADDR_YEAR);
+    rtc_date->year = bcd_to_binary(year);
+
 }
 
 static void ds1307_i2c_pin_config(void)
@@ -130,4 +185,15 @@ static uint8_t ds1307_read(uint8_t reg_addr)
     I2C_MasterReceiveData(&g_Ds1307I2cHandle, &rec_data, 1, DS1307_I2C_ADDRESS, 0);
 
     return rec_data;        
+}
+
+static uint8_t binary_to_bcd(uint8_t binary)
+{
+    uint8_t bcd = ((binary / 10) << 4) | (binary % 10);
+    return bcd;
+}
+static uint8_t bcd_to_binary(uint8_t bcd)
+{
+    uint8_t binary = ((bcd >> 4) * 10) + (bcd & 0x0F);
+    return binary;
 }
