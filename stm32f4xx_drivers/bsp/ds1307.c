@@ -1,5 +1,6 @@
 #include "ds1307.h"
 #include <cstring.h>
+
 static void ds1307_i2c_pin_config(void);
 static void ds1307_i2c_config(void);
 static void ds1307_write(uint8_t data, uint8_t reg_addr);
