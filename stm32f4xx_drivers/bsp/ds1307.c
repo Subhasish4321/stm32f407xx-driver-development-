@@ -1,5 +1,5 @@
 #include "ds1307.h"
-#include <cstring.h>
+#include <string.h>
 
 static void ds1307_i2c_pin_config(void);
 static void ds1307_i2c_config(void);
@@ -25,7 +25,7 @@ uint8_t ds1307_init(void)
     ds1307_i2c_config();
 
     //3. Enable the i2c peripheral
-    I2C_PeriphealControl(DS1307_I2C, ENABLE);
+    I2C_PeripheralControl(DS1307_I2C, ENABLE);
 
     //4. Make clock halt(CH ) bit = 0 to start the clock.
         //Initially on power up the CH bit is set to 1 which means the clock is halted. So we need to clear this bit to start the clock.
@@ -53,7 +53,7 @@ void ds1307_set_current_time(RTC_time_t *rtc_time)
     else
     {
         hrs |= (1 << 6); 
-        hrs = (rtc_time->time_format == TIME_FORMAT_12HRS_AM) ? hrs & ~(1 << 5) : hrs |= (1 << 5) ;
+        hrs = (rtc_time->time_format == TIME_FORMAT_12HRS_AM) ? hrs & ~(1 << 5) : hrs | (1 << 5) ;
     }
     ds1307_write(hrs, DS1307_ADDR_HOUR);
 }

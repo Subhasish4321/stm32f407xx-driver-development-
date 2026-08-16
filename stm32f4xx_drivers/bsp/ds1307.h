@@ -64,6 +64,5 @@ void ds1307_get_current_time(RTC_time_t *rtc_time);
 void ds1307_set_current_date(RTC_date_t *rtc_date);
 void ds1307_get_current_date(RTC_date_t *rtc_date);
 
-void ds1307_write(uint8_t data, uint8_t reg_addr); /* This is a 8 bit chip so we can use uint8_t for address */
 
 #endif /* DS1307_H_ */
